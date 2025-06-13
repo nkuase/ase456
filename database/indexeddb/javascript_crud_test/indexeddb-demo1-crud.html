@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndexedDB CRUD Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .delete-btn {
+            background: #dc3545;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            min-height: 50px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .code-explanation {
+            background: #e7f3ff;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>IndexedDB CRUD Operations Demo</h1>
+    
+    <div class="code-explanation">
+        <strong>What is IndexedDB?</strong><br>
+        IndexedDB is a low-level API for storing large amounts of structured data in the browser. 
+        Unlike localStorage, it can store complex objects and provides transaction-based operations.
+    </div>
+
+    <div class="container section">
+        <h2>1. CREATE - Add Data</h2>
+        <p>Add the sample data to the database:</p>
+        <button onclick="createData()">Create Sample Data</button>
+        <div class="output" id="createOutput">Click "Create Sample Data" to add data to IndexedDB...</div>
+    </div>
+
+    <div class="container section">
+        <h2>2. READ - Retrieve Data</h2>
+        <p>Read data from the database:</p>
+        <button onclick="readData()">Read Data</button>
+        <button onclick="readAllData()">Read All Data</button>
+        <div class="output" id="readOutput">Click "Read Data" to retrieve the stored data...</div>
+    </div>
+
+    <div class="container section">
+        <h2>3. UPDATE - Modify Data</h2>
+        <p>Update the data with new values:</p>
+        <input type="text" id="newFoo" placeholder="New foo value" value="updated_value">
+        <input type="number" id="newBar" placeholder="New bar value" value="999">
+        <button onclick="updateData()">Update Data</button>
+        <div class="output" id="updateOutput">Modify the values above and click "Update Data"...</div>
+    </div>
+
+    <div class="container section">
+        <h2>4. DELETE - Remove Data</h2>
+        <p>Delete data from the database:</p>
+        <button onclick="deleteData()" class="delete-btn">Delete Data</button>
+        <button onclick="clearDatabase()" class="delete-btn">Clear Entire Database</button>
+        <div class="output" id="deleteOutput">Click "Delete Data" to remove the stored data...</div>
+    </div>
+
+    <script>
+        // Database configuration
+        const DB_NAME = 'StudentDatabase';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'dataStore';
+        
+        let db;
+
+        // Initialize the database when page loads
+        window.onload = function() {
+            initDatabase();
+        };
+
+        // 1. DATABASE INITIALIZATION
+        function initDatabase() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            
+            request.onerror = function(event) {
+                console.error('Database error:', event.target.error);
+                updateOutput('createOutput', 'Error opening database: ' + event.target.error);
+            };
+            
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                updateOutput('createOutput', 'Database initialized successfully!');
+                console.log('Database opened successfully');
+            };
+            
+            // This event is only triggered when the database is created or upgraded
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                
+                // Create an object store (like a table in SQL)
+                const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                
+                console.log('Object store created');
+                updateOutput('createOutput', 'Database structure created!');
+            };
+        }
+
+        // 2. CREATE - Add data to the database
+        function createData() {
+            if (!db) {
+                updateOutput('createOutput', 'Database not initialized');
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            
+            // Our sample data with a unique ID
+            const data = {
+                id: 1, // Primary key
+                foo: 'hmeiijfc',
+                bar: 580
+            };
+            
+            const request = objectStore.add(data);
+            
+            request.onsuccess = function(event) {
+                updateOutput('createOutput', 'Data created successfully: ' + JSON.stringify(data, null, 2));
+            };
+            
+            request.onerror = function(event) {
+                updateOutput('createOutput', 'Error creating data: ' + event.target.error);
+            };
+        }
+
+        // 3. READ - Retrieve data from the database
+        function readData() {
+            if (!db) {
+                updateOutput('readOutput', 'Database not initialized');
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.get(1); // Get data with ID = 1
+            
+            request.onsuccess = function(event) {
+                const result = event.target.result;
+                if (result) {
+                    updateOutput('readOutput', 'Data found: ' + JSON.stringify(result, null, 2));
+                } else {
+                    updateOutput('readOutput', 'No data found with ID = 1');
+                }
+            };
+            
+            request.onerror = function(event) {
+                updateOutput('readOutput', 'Error reading data: ' + event.target.error);
+            };
+        }
+
+        // READ ALL - Get all data in the store
+        function readAllData() {
+            if (!db) {
+                updateOutput('readOutput', 'Database not initialized');
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.getAll();
+            
+            request.onsuccess = function(event) {
+                const results = event.target.result;
+                if (results.length > 0) {
+                    updateOutput('readOutput', 'All data: ' + JSON.stringify(results, null, 2));
+                } else {
+                    updateOutput('readOutput', 'No data found in database');
+                }
+            };
+        }
+
+        // 4. UPDATE - Modify existing data
+        function updateData() {
+            if (!db) {
+                updateOutput('updateOutput', 'Database not initialized');
+                return;
+            }
+
+            const newFoo = document.getElementById('newFoo').value;
+            const newBar = parseInt(document.getElementById('newBar').value);
+            
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            
+            // Updated data
+            const updatedData = {
+                id: 1, // Same ID to update existing record
+                foo: newFoo,
+                bar: newBar
+            };
+            
+            const request = objectStore.put(updatedData); // put() updates or creates
+            
+            request.onsuccess = function(event) {
+                updateOutput('updateOutput', 'Data updated successfully: ' + JSON.stringify(updatedData, null, 2));
+            };
+            
+            request.onerror = function(event) {
+                updateOutput('updateOutput', 'Error updating data: ' + event.target.error);
+            };
+        }
+
+        // 5. DELETE - Remove specific data
+        function deleteData() {
+            if (!db) {
+                updateOutput('deleteOutput', 'Database not initialized');
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.delete(1); // Delete record with ID = 1
+            
+            request.onsuccess = function(event) {
+                updateOutput('deleteOutput', 'Data with ID = 1 deleted successfully');
+            };
+            
+            request.onerror = function(event) {
+                updateOutput('deleteOutput', 'Error deleting data: ' + event.target.error);
+            };
+        }
+
+        // DELETE ALL - Clear entire database
+        function clearDatabase() {
+            if (!db) {
+                updateOutput('deleteOutput', 'Database not initialized');
+                return;
+            }
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.clear();
+            
+            request.onsuccess = function(event) {
+                updateOutput('deleteOutput', 'All data cleared from database');
+            };
+            
+            request.onerror = function(event) {
+                updateOutput('deleteOutput', 'Error clearing database: ' + event.target.error);
+            };
+        }
+
+        // Helper function to update output displays
+        function updateOutput(elementId, message) {
+            document.getElementById(elementId).textContent = message;
+        }
+    </script>
+</body>
+</html>

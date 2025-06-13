@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndexedDB Browser Demo</title>
+    <style>
+        body { padding: 20px; font-family: Arial, sans-serif; }
+        button { margin: 5px; padding: 10px; }
+        #output { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>IndexedDB Browser Demo</h1>
+    <div>
+        <button onclick="addRecord()">Add Random Record</button>
+        <button onclick="getAllRecords()">Show All Records</button>
+        <button onclick="clearAllRecords()">Clear All Records</button>
+    </div>
+    <div id="output"></div>
+
+    <script>
+        let db;
+        const dbName = 'recordsDB';
+        const storeName = 'records';
+
+        // Initialize database
+        const request = indexedDB.open(dbName, 1);
+
+        request.onerror = (event) => {
+            console.error("Database error:", event.target.error);
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("Database opened successfully");
+        };
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+            }
+        };
+
+        // Helper function to show output
+        function showOutput(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<div>${JSON.stringify(message, null, 2)}</div><hr>`;
+        }
+
+        // Add a random record
+        function addRecord() {
+            const data = {
+                foo: Math.random().toString(36).substring(2, 10),
+                bar: Math.floor(Math.random() * 1000)
+            };
+
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.add(data);
+
+            request.onsuccess = () => {
+                showOutput(data);
+            };
+        }
+
+        // Get all records
+        function getAllRecords() {
+            const transaction = db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                showOutput({ data: request.result });
+            };
+        }
+
+        // Clear all records
+        function clearAllRecords() {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+
+            request.onsuccess = () => {
+                showOutput({ message: 'All records cleared' });
+            };
+        }
+    </script>
+</body>
+</html> 
