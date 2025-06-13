@@ -1,0 +1,14 @@
+name: calculator
+description: A sample command-line application.
+version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.17.6 <4.0.0'
+
+dependencies:
+  expressions: ^0.2.5
+
+dev_dependencies:
+  lints: ^2.0.0
+  test: ^1.21.0
