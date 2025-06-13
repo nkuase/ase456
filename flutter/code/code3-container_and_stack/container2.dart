@@ -14,21 +14,29 @@ class Home extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Container Demo'),),
       // https://api.flutter.dev/flutter/widgets/Container-class.html
-      body:  Container(
-        height: 80,
-        width: 260,
-        color: Colors.blueGrey,
-        // Child can be any widget
-        child: const Text(
-          "Text",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 25
-          ),
-        ),
-      ),
+      body: BlueBox(),
     );
   }
 }
 
-
+class BlueBox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 80,
+      width: 260,
+      // Child can be any widget
+      child: const Text(
+        "Text",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 25
+        ),  
+      ),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        border: Border.all(),
+      ),
+    );
+  }
+}
