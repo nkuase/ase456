@@ -10,6 +10,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends  State<MyApp> {
   int tab = 0; 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,17 +38,25 @@ class _MyAppState extends  State<MyApp> {
 } 
 
 class Home1 extends StatelessWidget {
+  static const TextStyle optionStyle =
+    TextStyle(fontSize: 50, fontWeight: FontWeight.bold);
   Widget build(BuildContext context) {
     return Scaffold(
-      body:Text("Home1"),
+      body:Center(
+        child:Text("Home1", style: optionStyle,)
+      ),
     );
   }
 }
 
 class Home2 extends StatelessWidget {
+  static const TextStyle optionStyle =
+    TextStyle(fontSize: 40, fontWeight: FontWeight.w100);  
   Widget build(BuildContext context) {
     return Scaffold(
-      body:Text("Home2"),
+      body:Center(
+        child:Text("Home2", style: optionStyle,)
+      ),
     );
   }
 }
