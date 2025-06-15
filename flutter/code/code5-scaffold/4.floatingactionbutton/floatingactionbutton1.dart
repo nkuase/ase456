@@ -6,7 +6,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // key is used for identification, so ignore it for now
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -41,7 +41,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // Scaffold has three elements abf
     return Scaffold(
       appBar: AppBar(title: Text(widget.title),),
-      body: Text('$_counter'),
+      body: Center(
+        child: Text(
+          '$_counter',
+          style: TextStyle(fontSize: 50),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         child: Icon(Icons.add),
