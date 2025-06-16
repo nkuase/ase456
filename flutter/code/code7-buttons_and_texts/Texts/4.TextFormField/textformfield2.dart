@@ -11,9 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: appTitle,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text(appTitle),
-        ),
+        appBar: AppBar(title: const Text(appTitle)),
         body: const MyCustomForm(),
       ),
     );
@@ -35,14 +33,21 @@ class _MyCustomFormState extends State<MyCustomForm> {
   // Note: This is a GlobalKey<FormState>, not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
   var _controller = TextEditingController();
-  
+
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
     _controller.dispose();
     super.dispose();
   }
-  
+
+  String? validateRequired(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter some text';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     //TextEditingController _controller = TextEditingController();
@@ -55,12 +60,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
           TextFormField(
             controller: _controller,
             // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter some text';
-              }
-              return null;
-            },
+            validator: (value) => validateRequired(value),
           ),
           ElevatedButton(
             onPressed: () {
