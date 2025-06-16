@@ -27,4 +27,3 @@ class Home extends StatelessWidget {
     );
   }
 }
-
