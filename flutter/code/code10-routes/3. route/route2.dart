@@ -36,7 +36,6 @@ void main() {
             },
           );
         }
-        assert(false, 'Need to implement ${settings.name}');
         return null;
       },
     )
@@ -44,7 +43,7 @@ void main() {
 }
 
 class MyPage extends StatelessWidget {
-  const MyPage({Key? key}) : super(key: key);
+  const MyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +55,7 @@ class MyPage extends StatelessWidget {
               var res = await Navigator.pushNamed(
                 context,
                 Page1.route,
-                arguments: Arguments(
-                  'calling page1',
-                  10
-                ),
+                arguments: Arguments('calling page1', 10),
               );
               print(res);
             },
@@ -70,10 +66,7 @@ class MyPage extends StatelessWidget {
               var res = await Navigator.pushNamed(
                 context,
                 Page2.route,
-                arguments: Arguments(
-                  'calling page2',
-                  20
-                ),
+                arguments: Arguments('calling page2', 20),
               );
               print(res);
             },
@@ -89,10 +82,7 @@ class Page1 extends StatelessWidget {
   static String route = '/page1';
   Arguments arguments;
 
-  Page1({
-    // super.key,
-    required this.arguments,
-  });
+  Page1({required this.arguments,});
    
   @override
   Widget build(BuildContext context) {
@@ -116,10 +106,7 @@ class Page2 extends StatelessWidget {
   static String route = '/page2';
    
   Arguments arguments;
-  Page2({
-    // super.key,
-    required this.arguments,
-  });
+  Page2({required this.arguments,});
   
   @override
   Widget build(BuildContext context) {

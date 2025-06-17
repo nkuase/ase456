@@ -1,62 +1,73 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MaterialApp(home:MyApp())); 
+/*
+return DefaultTabController(
+  length: 3,
+  child: Scaffold(
+    appBar: AppBar(
+      title: ...
+      bottom: const TabBar(
+        tabs: <Widget>[
+          Tab(...),
+          Tab(...),
+          Tab(...),
+        ]
+      )
+    )
+    body: TabBarView(
+      children: <Widget>[
+        ...             
+      ],
+    ),
+  ),
+),  
+*/
 
-class MyApp extends StatefulWidget {
-  const MyApp(); 
+// We can use tabs in the Material App Design
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: TabPage(),);
+  }
 }
 
-class _MyAppState extends  State<MyApp> {
-  int tab = 0; 
-
+class TabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: [Home1(), Home2()][tab],
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: tab,
-        onTap: (i) {
-          setState(() {tab = i;});
-        },
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Home1',
-              backgroundColor: Colors.red),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag_outlined),
-              label: 'Home2',
-              backgroundColor: Colors.red),
-        ],
-      ),
-    );
-  }
-} 
-
-class Home1 extends StatelessWidget {
-  static const TextStyle optionStyle =
-    TextStyle(fontSize: 50, fontWeight: FontWeight.bold);
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:Center(
-        child:Text("Home1", style: optionStyle,)
+    // 1. DefaultTabController is needed
+    return DefaultTabController(
+      // 2. Specify the number of tabs
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tab'),
+          // 3. Specify tabBar with three tabs
+          bottom: const TabBar(
+            tabs: <Widget>[
+              Tab(icon: Icon(Icons.tag_faces)),
+              Tab(text: 'Menu2'),
+              Tab(icon: Icon(Icons.info), text: 'Menu3'),
+            ],
+          ),
+        ),
+        // Specify tabbarview
+        // We use Container as a Page, but we can use other widgets/pages
+        body: TabBarView(
+          children: <Widget>[
+            Container(color: Colors.yellow,),
+            Container(color: Colors.orange,),
+            Container(color: Colors.red,),
+          ]
+        ),
       ),
     );
   }
 }
 
-class Home2 extends StatelessWidget {
-  static const TextStyle optionStyle =
-    TextStyle(fontSize: 40, fontWeight: FontWeight.w100);  
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:Center(
-        child:Text("Home2", style: optionStyle,)
-      ),
-    );
-  }
-}
