@@ -1,4 +1,5 @@
 // How to give arguments \to the route
+// ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
 
@@ -9,9 +10,12 @@ class Arguments {
   Arguments(this.message, this.value);
 }
 
-void main() {
-  runApp(
-    MaterialApp(
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'Navigation with Arguments',
       home: const MyPage(),
       debugShowCheckedModeBanner: false,
@@ -36,10 +40,9 @@ void main() {
             },
           );
         }
-        return null;
       },
-    )
-  );
+    );
+  }
 }
 
 class MyPage extends StatelessWidget {
