@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Personal Expenses',
-      theme: mainTheme, // ThemeData()
+      theme: mainTheme, 
       home: MyHomePage(),
     );
   }

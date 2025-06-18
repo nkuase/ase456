@@ -90,7 +90,6 @@ class _NewTransactionState extends State<NewTransaction> {
                     ),
                   ),
                   TextButton(
-                    //textColor: Theme.of(context).primaryColor,
                     style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).primaryColor),
                     child: Text(
