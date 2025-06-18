@@ -16,10 +16,10 @@ class Movie {
 
   Movie.fromJson(Map<String, dynamic> parsedJson) {
     this.id = parsedJson['id'] as int;
-    this.title = parsedJson['title'] as String;
-    this.voteAverage = (parsedJson['vote_average'] as double);
-    this.releaseDate = parsedJson['release_date'] as String;
-    this.overview = parsedJson['overview'] as String;
-    this.posterPath = parsedJson['poster_path'] as String;
+    this.title = parsedJson['title'] as String? ?? '';
+    this.voteAverage = (parsedJson['vote_average'] as double?) ?? 0.0;
+    this.releaseDate = parsedJson['release_date'] as String? ?? '';
+    this.overview = parsedJson['overview'] as String? ?? '';
+    this.posterPath = parsedJson['poster_path'] as String? ?? '';
   }
 }

@@ -32,6 +32,6 @@ class MovieDetail extends StatelessWidget {
               child: Text(movie.overview),
             )
           ],
-        ))));
+        ),),),);
   }
 }

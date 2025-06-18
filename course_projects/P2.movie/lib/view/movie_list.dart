@@ -30,11 +30,12 @@ class _MovieListState extends State<MovieList> {
   Widget build(BuildContext context) {
     NetworkImage image;
     return Scaffold(
-        appBar: AppBar(title: searchBar, actions: <Widget>[
-          IconButton(
-            icon: visibleIcon,
-            onPressed: () {
-              setState(() {
+      appBar: AppBar(title: searchBar, actions: <Widget>[
+        IconButton(
+          icon: visibleIcon,
+          onPressed: () {
+            setState(
+              () {
                 if (this.visibleIcon.icon == Icons.search) {
                   this.visibleIcon = Icon(Icons.cancel);
                   this.searchBar = TextField(
@@ -43,7 +44,7 @@ class _MovieListState extends State<MovieList> {
                       search(text);
                     },
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 20.0,
                     ),
                   );
@@ -51,37 +52,41 @@ class _MovieListState extends State<MovieList> {
                   this.visibleIcon = Icon(Icons.search);
                   this.searchBar = Text('Movies');
                 }
-              });
-            },
-          ),
-        ]),
-        body: ListView.builder(
-            itemCount: (this.moviesCount == null) ? 0 : this.moviesCount,
-            itemBuilder: (BuildContext context, int position) {
-              if (movies?[position].posterPath != null) {
-                image = NetworkImage(iconBase + movies?[position].posterPath);
-              } else {
-                image = NetworkImage(defaultImage);
-              }
-              return Card(
-                  color: Colors.white,
-                  elevation: 2.0,
-                  child: ListTile(
-                    onTap: () {
-                      MaterialPageRoute route = MaterialPageRoute(
-                          builder: (_) => MovieDetail(movies?[position]));
-                      Navigator.push(context, route);
-                    },
-                    leading: CircleAvatar(
-                      backgroundImage: image,
-                    ),
-                    title: Text(movies?[position].title),
-                    subtitle: Text('Released: ' +
-                        movies?[position].releaseDate +
-                        ' - Vote: ' +
-                        movies![position].voteAverage.toString()),
-                  ));
-            }));
+              },
+            );
+          },
+        ),
+      ]),
+      body: ListView.builder(
+        itemCount: (this.moviesCount == null) ? 0 : this.moviesCount,
+        itemBuilder: (BuildContext context, int position) {
+          if (movies?[position].posterPath != null) {
+            image = NetworkImage(iconBase + movies?[position].posterPath);
+          } else {
+            image = NetworkImage(defaultImage);
+          }
+          return Card(
+            color: Colors.white,
+            elevation: 2.0,
+            child: ListTile(
+              onTap: () {
+                MaterialPageRoute route = MaterialPageRoute(
+                    builder: (_) => MovieDetail(movies?[position]));
+                Navigator.push(context, route);
+              },
+              leading: CircleAvatar(
+                backgroundImage: image,
+              ),
+              title: Text(movies?[position].title),
+              subtitle: Text('Released: ' +
+                  movies?[position].releaseDate +
+                  ' - Vote: ' +
+                  movies![position].voteAverage.toString()),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future search(text) async {
@@ -89,7 +94,7 @@ class _MovieListState extends State<MovieList> {
     setState(() {
       moviesCount = movies?.length;
       movies = movies;
-    });
+    },);
   }
 
   Future initialize() async {
@@ -97,6 +102,6 @@ class _MovieListState extends State<MovieList> {
     setState(() {
       moviesCount = movies?.length;
       movies = movies;
-    });
+    },);
   }
 }
