@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:climate/utilities/constants.dart';
+import 'package:climate/theme/constants.dart';
 import 'package:climate/services/weather.dart';
 import 'city_screen.dart';
 

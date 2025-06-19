@@ -18,13 +18,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void getLocationData() async {
-    var weatherData = await WeatherModel().getLocationWeather();
+    // Start both operations simultaneously
+    var weatherFuture = WeatherModel().getLocationWeather();
+    var minimumDelay = Future.delayed(Duration(seconds: 2));
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return LocationScreen(
-        locationWeather: weatherData,
-      );
-    }));
+    // Wait for both to complete
+    var results = await Future.wait([weatherFuture, minimumDelay]);
+    var weatherData = results[0];
+
+    if (mounted) {
+      // Check if widget still exists
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return LocationScreen(locationWeather: weatherData);
+      }));
+    }
   }
 
   @override
