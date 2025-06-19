@@ -30,25 +30,40 @@ class _HomePageState extends State<HomePage> {
   String userAnswer = '0';
 
   final List buttons = [
-    'C', 'DEL', '%', '/',
-    '9', '8', '7', '*',
-    '6', '5', '4', '-',
-    '3', '2', '1', '+',
-    '0', '.', 'ANS', '=',
+    'C',
+    'DEL',
+    '%',
+    '/',
+    '9',
+    '8',
+    '7',
+    '*',
+    '6',
+    '5',
+    '4',
+    '-',
+    '3',
+    '2',
+    '1',
+    '+',
+    '0',
+    '.',
+    'ANS',
+    '=',
   ];
 
   void calculateExpression() {
     try {
       if (userQuestion.isEmpty) return;
-      
+
       // ✅ Updated to current math_expressions API
       ExpressionParser parser = GrammarParser();
       Expression expression = parser.parse(userQuestion);
-      
+
       var context = ContextModel();
-      
+
       double result = expression.evaluate(EvaluationType.REAL, context);
-      
+
       setState(() {
         userAnswer = _formatResult(result);
       });
@@ -64,7 +79,8 @@ class _HomePageState extends State<HomePage> {
     if (result == result.toInt()) {
       return result.toInt().toString();
     } else {
-      return result.toStringAsFixed(6)
+      return result
+          .toStringAsFixed(6)
           .replaceAll(RegExp(r'0*$'), '')
           .replaceAll(RegExp(r'\.$'), '');
     }
@@ -155,41 +171,35 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      reverse: true, // Shows latest input
-                      child: Text(
-                        userQuestion.isEmpty ? 'Enter expression...' : userQuestion,
-                        style: TextStyle(
-                          color: userQuestion.isEmpty 
-                              ? Colors.grey[400] 
-                              : Colors.deepPurple[800],
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 1.2,
-                        ),
-                        textAlign: TextAlign.right,
+                    child: Text(
+                      userQuestion.isEmpty
+                          ? 'Enter expression...'
+                          : userQuestion,
+                      style: TextStyle(
+                        color: userQuestion.isEmpty
+                            ? Colors.grey[400]
+                            : Colors.deepPurple[800],
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.2,
                       ),
+                      textAlign: TextAlign.right,
                     ),
                   ),
-                  
+
                   // Output Section
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 15),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: Text(
-                        userAnswer,
-                        style: TextStyle(
-                          color: Colors.deepPurple[900],
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
-                        ),
-                        textAlign: TextAlign.right,
+                    child: Text(
+                      userAnswer,
+                      style: TextStyle(
+                        color: Colors.deepPurple[900],
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
                       ),
+                      textAlign: TextAlign.right,
                     ),
                   ),
                 ],
@@ -229,3 +239,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
