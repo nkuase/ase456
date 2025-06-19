@@ -4,15 +4,12 @@ import 'dart:convert';
 import 'package:movie/model/movie.dart';
 
 class APIRunner {
-  final String api_key = 'api_key=8361ad82497ec1cf55ca10b74f1d3750'; // Replace with your actual API key
+  final String api_key = 'api_key=18361ad82497ec1cf55ca10b74f1d3750'; // Replace with your actual API key
   // Note: The API key should be kept secret and not hardcoded in production code.
   // For demonstration purposes, this is a placeholder API key.
   // In a real application, consider using environment variables or secure storage for sensitive information.
   // Example of a read access token, replace with your actual token if needed
   // Note: This token is for demonstration purposes only and should not be used in production.
-  final String api_read_access_token =
-      'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MzYxYWQ4MjQ5N2VjMWNmNTVjYTEwYjc0ZjFkMzc1MCIsIm5iZiI6MTY1OTEzOTY4Mi4wMzQsInN1YiI6IjYyZTQ3NjYyOGQyZjhkMDA2MTViNzZlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Wv3cAezxDS8uuxk6W3voaWeqiL8iHZAwnRgR12OJs-M';
-
   final String urlBase = 'https://api.themoviedb.org/3';
   final String apiUpcoming = '/movie/upcoming?';
   final String apiSearch = '/search/movie?';
