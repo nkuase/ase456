@@ -10,6 +10,7 @@ git submodule add https://github.com/make2grow/ase456_course_projects.git course
 # first commit
 git add .gitmodules course_projects
 git commit -m "Add ase456_course_projects as a submodule in course_projects"
+git push
 
 # clone this repo with submodules
 git clone --recurse-submodules https://github.com/nkuase/ase456.git
