@@ -26,9 +26,9 @@ class PocketBaseStudentService {
       
       // Try to authenticate with admin user (optional)
       try {
-        await _pb.collection('users').authWithPassword(
+        await _pb.admins.authWithPassword(
           'admin@example.com', 
-          'password123'
+          'admin123456'
         );
         print('✅ PocketBase authenticated successfully');
       } catch (e) {

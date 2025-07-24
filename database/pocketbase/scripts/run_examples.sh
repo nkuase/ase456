@@ -3,6 +3,9 @@
 # PocketBase Student Example Runner
 # This script helps students run the PocketBase examples easily
 
+pushd .
+cd ..
+
 echo "📦 PocketBase Student Management Example"
 echo "========================================"
 
@@ -83,3 +86,5 @@ echo "   - Try running: ./pocketbase serve"
 echo "   - Access admin panel: http://127.0.0.1:8090/_/"
 echo "   - Create custom collections and fields"
 echo "   - Experiment with real-time subscriptions"
+
+popd
