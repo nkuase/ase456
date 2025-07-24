@@ -1,0 +1,52 @@
+name: firebase_student_app
+description: A Flutter application demonstrating Firebase CRUD operations with students data.
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase core - required for all Firebase services
+  firebase_core: ^2.15.0
+  
+  # Firestore database
+  cloud_firestore: ^4.8.0
+  
+  # Optional: Authentication
+  firebase_auth: ^4.10.0
+  
+  # Firebase Storage for file uploads
+  firebase_storage: ^11.2.0
+  
+  # Firebase Functions
+  cloud_functions: ^4.3.0
+  
+  # Firebase Analytics
+  firebase_analytics: ^10.4.0
+  
+  # Firebase Crashlytics
+  firebase_crashlytics: ^3.3.0
+  
+  # Firebase Performance
+  firebase_performance: ^0.9.2+0
+  
+  # Utility packages
+  uuid: ^3.0.7
+  intl: ^0.18.1
+  
+  # UI
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,13 +1,35 @@
-name: sqlite_crud_demo
-description: A simple CRUD application demonstrating SQLite operations in pure Dart
-version: 1.0.0
+name: sqlite_example
+description: SQLite implementation of database service for desktop and mobile applications
+version: 1.0.0+1
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  # SQLite support for Dart applications
   sqlite3: ^2.4.0
+  
+  # Path manipulation utilities
   path: ^1.8.3
+  
+  # Utility packages
+  uuid: ^3.0.7
+  intl: ^0.18.1
 
 dev_dependencies:
+  # Testing framework
   test: ^1.21.0
+  
+  # Linting
+  lints: ^2.0.0
+
+# Platform configuration
+platforms:
+  linux:
+  macos:
+  windows:
+  android:
+  ios:
+
+# This package works on desktop and mobile platforms
+# SQLite is not available in web browsers - use IndexedDB for web applications

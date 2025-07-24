@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # Main Flutter app development environment
+  flutter-app:
+    build: .
+    container_name: firebase-student-app
+    ports:
+      - "3000:3000"     # Flutter web server
+      - "4000:4000"     # Firebase Emulator UI
+      - "5000:5000"     # Firebase Hosting
+      - "5001:5001"     # Firebase Functions
+      - "8080:8080"     # Firestore Emulator
+      - "9099:9099"     # Firebase Auth Emulator
+      - "9199:9199"     # Firebase Storage Emulator
+    volumes:
+      - .:/app
+      - flutter_cache:/root/.flutter
+      - pub_cache:/root/.pub-cache
+    environment:
+      - FLUTTER_WEB_PORT=3000
+      - FIREBASE_PROJECT=demo-project
+      - FIRESTORE_EMULATOR_HOST=localhost:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+      - FIREBASE_STORAGE_EMULATOR_HOST=localhost:9199
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+    networks:
+      - firebase-network
+
+  # PostgreSQL for comparison/migration examples
+  postgres:
+    image: postgres:15-alpine
+    container_name: firebase-postgres
+    environment:
+      POSTGRES_DB: student_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sample_data:/docker-entrypoint-initdb.d/sample_data
+    networks:
+      - firebase-network
+
+  # Redis for caching examples
+  redis:
+    image: redis:7-alpine
+    container_name: firebase-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - firebase-network
+
+  # PocketBase for database comparison
+  pocketbase:
+    image: spectado/pocketbase:latest
+    container_name: firebase-pocketbase
+    ports:
+      - "8090:8090"
+    volumes:
+      - pocketbase_data:/pb_data
+    networks:
+      - firebase-network
+
+  # MongoDB for NoSQL comparison
+  mongodb:
+    image: mongo:6
+    container_name: firebase-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - firebase-network
+
+  # Documentation server
+  docs:
+    image: nginx:alpine
+    container_name: firebase-docs
+    ports:
+      - "8888:80"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - firebase-network
+
+# Named volumes for persistence
+volumes:
+  flutter_cache:
+    driver: local
+  pub_cache:
+    driver: local
+  postgres_data:
+    driver: local
+  pocketbase_data:
+    driver: local
+  mongodb_data:
+    driver: local
+
+# Network for service communication
+networks:
+  firebase-network:
+    driver: bridge
+
+# Override for development with live reload
+version: '3.8'
+services:
+  flutter-dev:
+    extends: flutter-app
+    command: >
+      bash -c "
+        echo '🔥 Starting Firebase Student App Development Environment' &&
+        echo '========================================================' &&
+        echo '' &&
+        echo '🚀 Starting Firebase Emulators...' &&
+        firebase emulators:start --detach &&
+        echo '' &&
+        echo '📱 Starting Flutter Web Server...' &&
+        flutter run -d web-server --web-port 3000 --web-hostname 0.0.0.0
+      "
+    depends_on:
+      - postgres
+      - redis
+      - pocketbase
+      - mongodb
+
+# Production-like environment
+version: '3.8'
+services:
+  flutter-prod:
+    extends: flutter-app
+    environment:
+      - FLUTTER_ENV=production
+      - FIREBASE_PROJECT=your-production-project
+    command: >
+      bash -c "
+        flutter build web --release &&
+        flutter run -d web-server --web-port 3000 --web-hostname 0.0.0.0 --release
+      "
