@@ -115,25 +115,34 @@ class FooBarCrudService {
     }
   }
 
-  /// UTILITY: Count total number of FooBar records
-  /// Useful for pagination or statistics
-  Future<int> count() async {
+  /// DELETE ALL: Remove all FooBar records from the database
+  /// WARNING: This is a destructive operation that cannot be undone!
+  /// Uses pagination to handle large datasets efficiently
+  /// Prints total number of deleted records for confirmation
+  Future<void> deleteAllRecords() async {
     try {
-      final result = await _pb.collection(_collectionName).getFullList();
-      return result.length;
-    } catch (e) {
-      throw Exception('Failed to count FooBar records: $e');
-    }
-  }
+      int page = 1;
+      const int perPage = 10;
+      int totalDeleted = 0;
 
-  /// UTILITY: Check if a FooBar record exists by ID
-  /// Returns true if the record exists, false otherwise
-  Future<bool> exists(String id) async {
-    try {
-      await _pb.collection(_collectionName).getOne(id);
-      return true;
+      // Process records in batches to avoid memory issues with large datasets
+      while (true) {
+        final result = await _pb
+            .collection(_collectionName)
+            .getList(page: page, perPage: perPage);
+
+        // If no more records, break the loop
+        if (result.items.isEmpty) break;
+
+        // Delete each record in the current batch
+        for (final item in result.items) {
+          await _pb.collection(_collectionName).delete(item.id);
+          totalDeleted++;
+        }
+      }
+      print('Total records deleted: $totalDeleted');
     } catch (e) {
-      return false; // Record doesn't exist
+      throw Exception('Failed to delete all FooBar records: $e');
     }
   }
 }

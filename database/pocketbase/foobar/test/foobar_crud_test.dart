@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:pocketbase/pocketbase.dart';
 import '../lib/foobar_crud.dart';
+import '../lib/foobar_utility.dart';
 import '../lib/foobar.dart';
 
 void main() {
@@ -84,22 +85,12 @@ void main() {
       );
     });
 
-    test('should have count method', () async {
+    test('should have deleteAllRecords method', () async {
       // Act & Assert
       // This will throw an exception because no database connection,
       // but it proves the method exists
       expect(
-        () async => await service.count(),
-        throwsA(isA<Exception>()),
-      );
-    });
-
-    test('should have exists method that accepts String', () async {
-      // Act & Assert
-      // This will throw an exception because no database connection,
-      // but it proves the method exists and accepts String parameter
-      expect(
-        () async => await service.exists('test_id'),
+        () async => await service.deleteAllRecords(),
         throwsA(isA<Exception>()),
       );
     });
@@ -182,18 +173,6 @@ void main() {
         );
       }
     });
-
-    test('exists should handle different ID types', () async {
-      // Test with different ID formats
-      final existsIds = ['123', 'might_exist', ''];
-
-      for (final id in existsIds) {
-        expect(
-          () async => await service.exists(id),
-          throwsA(isA<Exception>()),
-        );
-      }
-    });
   });
 
   group('FooBarCrudService Edge Cases', () {
@@ -229,6 +208,140 @@ void main() {
       expect(
         () async => await service.getById(longId),
         throwsA(isA<Exception>()),
+      );
+    });
+
+    test('deleteAllRecords should handle no database connection gracefully', () async {
+      // Act & Assert
+      // This destructive operation should fail gracefully with proper error message
+      expect(
+        () async => await service.deleteAllRecords(),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('deleteAllRecords should be callable multiple times', () async {
+      // Act & Assert
+      // Even if called multiple times, it should handle errors consistently
+      expect(
+        () async {
+          await service.deleteAllRecords();
+          await service.deleteAllRecords(); // Second call
+        },
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
+
+  // NEW: Tests for FooBarUtility class (count and exists methods moved here)
+  group('FooBarUtility Simple Tests', () {
+    late FooBarUtility utility;
+    late FooBarCrudService crudService;
+
+    setUp(() {
+      final pb = PocketBase('http://127.0.0.1:8090');
+      crudService = FooBarCrudService(pb);
+      utility = FooBarUtility(crudService);
+    });
+
+    test('should create utility instance', () {
+      // Assert
+      expect(utility, isNotNull);
+    });
+
+    test('should have count method', () async {
+      // Act & Assert
+      // This will throw an exception because no database connection,
+      // but it proves the method exists
+      expect(
+        () async => await utility.count(),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('should have exists method that accepts String', () async {
+      // Act
+      final result = await utility.exists('test_id');
+      
+      // Assert
+      // exists method returns false when no database connection or record not found
+      expect(result, isFalse);
+      expect(result, isA<bool>());
+    });
+  });
+
+  group('FooBarUtility Method Parameter Tests', () {
+    late FooBarUtility utility;
+    late FooBarCrudService crudService;
+
+    setUp(() {
+      final pb = PocketBase('http://127.0.0.1:8090');
+      crudService = FooBarCrudService(pb);
+      utility = FooBarUtility(crudService);
+    });
+
+    test('exists should handle different ID types', () async {
+      // Test with different ID formats
+      final existsIds = ['123', 'might_exist', ''];
+
+      for (final id in existsIds) {
+        final result = await utility.exists(id);
+        // exists method should return false for non-existent records
+        expect(result, isFalse);
+        expect(result, isA<bool>());
+      }
+    });
+
+    test('count should be consistent', () async {
+      // Act & Assert
+      // Multiple calls should behave consistently (all should throw in test environment)
+      expect(
+        () async => await utility.count(),
+        throwsA(isA<Exception>()),
+      );
+      
+      expect(
+        () async => await utility.count(),
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
+
+  group('FooBarUtility Edge Cases', () {
+    late FooBarUtility utility;
+    late FooBarCrudService crudService;
+
+    setUp(() {
+      final pb = PocketBase('http://127.0.0.1:8090');
+      crudService = FooBarCrudService(pb);
+      utility = FooBarUtility(crudService);
+    });
+
+    test('exists should handle very long IDs', () async {
+      // Test with very long ID
+      final longId = 'x' * 500;
+      
+      final result = await utility.exists(longId);
+      expect(result, isFalse);
+      expect(result, isA<bool>());
+    });
+
+    test('exists should handle empty string ID', () async {
+      // Test with empty string
+      final result = await utility.exists('');
+      expect(result, isFalse);
+      expect(result, isA<bool>());
+    });
+
+    test('count should handle network errors gracefully', () async {
+      // Act & Assert
+      // Should throw exception with meaningful error message
+      expect(
+        () async => await utility.count(),
+        throwsA(allOf(
+          isA<Exception>(),
+          predicate((e) => e.toString().contains('Failed to count FooBar records')),
+        )),
       );
     });
   });

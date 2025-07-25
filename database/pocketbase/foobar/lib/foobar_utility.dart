@@ -214,47 +214,26 @@ class FooBarUtility {
       throw Exception('Failed to clear database: $e');
     }
   }
-}
 
-/// Example usage and testing
-void main() async {
-  // Initialize PocketBase and services
-  final pb = PocketBase('http://127.0.0.1:8090');
-  final crudService = FooBarCrudService(pb);
-  final utility = FooBarUtility(crudService);
+  /// UTILITY: Count total number of FooBar records
+  /// Useful for pagination or statistics
+  Future<int> count() async {
+    try {
+      final allRecords = await _crudService.getAll();
+      return allRecords.length;
+    } catch (e) {
+      throw Exception('Failed to count FooBar records: $e');
+    }
+  }
 
-  // File paths for testing
-  final sampleFile =
-      '/Users/smcho/github/nkuase/ase456/database/pocketbase/test/foobar/sample_data.json';
-  final exportFile =
-      '/Users/smcho/github/nkuase/ase456/database/pocketbase/test/foobar/exported_data.json';
-  final backupDir =
-      '/Users/smcho/github/nkuase/ase456/database/pocketbase/test/foobar/backups';
-
-  try {
-    print('=== FooBar Utility Demo ===\n');
-
-    // Example 1: Create sample JSON file
-    print('1. Creating sample JSON file...');
-    await utility.createSampleJsonFile(sampleFile);
-
-    // Example 2: Import data from JSON file
-    print('\n2. Importing data from JSON file...');
-    final importedCount = await utility.importFromJsonFile(sampleFile);
-    print('Imported $importedCount records');
-
-    // Example 3: Export data to JSON file
-    print('\n3. Exporting data to JSON file...');
-    final exportedCount = await utility.exportToJsonFile(exportFile);
-    print('Exported $exportedCount records');
-
-    // Example 4: Create backup
-    print('\n4. Creating database backup...');
-    final backupPath = await utility.backupDatabase(backupDir);
-    print('Backup created at: $backupPath');
-
-    print('\n=== Demo Complete ===');
-  } catch (e) {
-    print('Error during demo: $e');
+  /// UTILITY: Check if a FooBar record exists by ID
+  /// Returns true if the record exists, false otherwise
+  Future<bool> exists(String id) async {
+    try {
+      await _crudService.getById(id);
+      return true;
+    } catch (e) {
+      return false; // Record doesn't exist
+    }
   }
 }
