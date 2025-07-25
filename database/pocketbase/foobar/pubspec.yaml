@@ -14,15 +14,6 @@ dependencies:
 dev_dependencies:
   # Testing framework
   test: ^1.24.0
-  
-  # Mocking framework  
-  mockito: ^5.4.0
-  
-  # Code generation for mocks
-  build_runner: ^2.4.0
-  
-  # JSON annotation (if needed)
-  json_annotation: ^4.8.0
 
 # Note: In a real project, you would add these to your existing pubspec.yaml
 # This file is just for reference

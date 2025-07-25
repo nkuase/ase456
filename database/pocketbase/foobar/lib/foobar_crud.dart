@@ -54,6 +54,23 @@ class FooBarCrudService {
     }
   }
 
+  /// READ: Get paginated FooBar records from the database
+  /// Returns a list of FooBar objects
+  Future<List<FooBar>> getRecord([int page = 1, int perPage = 5]) async {
+    try {
+      // Get paginated list (ResultList wrapper object)
+      final resultList = await _pb
+          .collection(_collectionName)
+          .getList(page: page, perPage: perPage);
+
+      return resultList.items
+          .map((record) => FooBar.fromJson(record.data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get all FooBar records: $e');
+    }
+  }
+
   /// READ: Search FooBar records with filtering
   /// Example usage: searchByFoo("hello") returns all records where foo contains "hello"
   Future<List<FooBar>> searchByFoo(String searchTerm) async {
@@ -118,47 +135,5 @@ class FooBarCrudService {
     } catch (e) {
       return false; // Record doesn't exist
     }
-  }
-}
-
-/// Example usage and testing
-void main() async {
-  // Initialize PocketBase client
-  final pb = PocketBase('http://127.0.0.1:8090');
-
-  // Create CRUD service instance
-  final foobarService = FooBarCrudService(pb);
-
-  try {
-    // Example 1: CREATE a new FooBar
-    print('=== Creating a new FooBar ===');
-    final newFoobar = FooBar(foo: 'Hello World', bar: 42);
-    final createdFoobar = await foobarService.create(newFoobar);
-    print('Created: ${createdFoobar.foo}, ${createdFoobar.bar}');
-
-    // Example 2: READ by ID (you would use the actual ID from creation)
-    // print('=== Reading FooBar by ID ===');
-    // final foundFoobar = await foobarService.getById('actual_record_id');
-    // print('Found: ${foundFoobar.foo}, ${foundFoobar.bar}');
-
-    // Example 3: READ all FooBars
-    print('=== Reading all FooBars ===');
-    final allFoobars = await foobarService.getAll();
-    print('Total records: ${allFoobars.length}');
-    for (final foobar in allFoobars) {
-      print('- ${foobar.foo}: ${foobar.bar}');
-    }
-
-    // Example 4: SEARCH FooBars
-    print('=== Searching FooBars ===');
-    final searchResults = await foobarService.searchByFoo('Hello');
-    print('Search results: ${searchResults.length}');
-
-    // Example 5: COUNT records
-    print('=== Counting FooBars ===');
-    final totalCount = await foobarService.count();
-    print('Total FooBar records: $totalCount');
-  } catch (e) {
-    print('Error: $e');
   }
 }

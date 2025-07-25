@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'foobar.dart';
+import '../lib/foobar.dart';
 
 // Unit Tests
 void main() {

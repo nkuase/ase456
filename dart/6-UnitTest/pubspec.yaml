@@ -1,0 +1,12 @@
+name: arith
+version: 1.0.0
+description: A simple Dart project for unit testing arith.dart
+
+environment:
+  sdk: ">=2.12.0 <4.0.0"
+
+dependencies:
+  # No runtime dependencies
+
+dev_dependencies:
+  test: ^1.24.0

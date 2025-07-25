@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:test/test.dart';
 import 'package:pocketbase/pocketbase.dart';
-import 'foobar_crud.dart';
-import 'foobar.dart';
+import '../lib/foobar_crud.dart';
+import '../lib/foobar.dart';
 
 void main() {
   group('FooBarCrudService Simple Tests', () {
