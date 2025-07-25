@@ -19,7 +19,12 @@ class Student {
 
   /// Convert Student to Map for PocketBase
   /// This is used when saving data to PocketBase
-  Map<String, dynamic> toMap() {
+  /// We don't include ID here because PocketBase generates it
+  /// and we don't need to send it back when creating a new record.
+  /// Note: createdAt is converted to ISO8601 string format for consistency
+  /// and to ensure it can be parsed correctly by PocketBase.
+  /// This method is useful for creating new records.
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'age': age,
@@ -41,7 +46,7 @@ class Student {
   }
 
   /// Create Student from Map (useful for testing)
-  factory Student.fromMap(Map<String, dynamic> map, String id) {
+  factory Student.fromJson(Map<String, dynamic> map, String id) {
     return Student(
       id: id,
       name: map['name'] as String? ?? '',

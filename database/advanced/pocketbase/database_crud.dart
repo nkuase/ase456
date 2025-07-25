@@ -1,9 +1,9 @@
-import '../models/student.dart';
+import '../../pocketbase/students/lib/models/student.dart';
 
 /// Abstract database service interface
 /// This allows easy switching between different database backends
 /// (Firebase, PocketBase, SQLite, etc.) without changing application logic
-abstract class DatabaseService {
+abstract class DatabaseCrudService {
   /// Initialize the database service
   Future<void> initialize();
   
@@ -78,23 +78,3 @@ abstract class DatabaseService {
   Future<int> deleteStudentsByMajor(String major);
 }
 
-/// Factory class for creating database service instances
-class DatabaseServiceFactory {
-  /// Create a Firebase database service
-  static DatabaseService createFirebaseService() {
-    // This would return FirebaseStudentService() if available
-    throw UnimplementedError('Firebase service not implemented in this package');
-  }
-  
-  /// Create a PocketBase database service
-  static DatabaseService createPocketBaseService() {
-    // This would return PocketBaseStudentService() if available
-    throw UnimplementedError('PocketBase service not implemented in this package');
-  }
-  
-  /// Create a SQLite database service
-  static DatabaseService createSQLiteService() {
-    // This would return SQLiteStudentService() if available
-    throw UnimplementedError('SQLite service not implemented in this package');
-  }
-}

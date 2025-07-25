@@ -1,13 +1,13 @@
-import '../models/student.dart';
-import '../services/database_service.dart';
-import '../services/pocketbase_database_adapter.dart';
+import '../../pocketbase/students/lib/models/student.dart';
+import '../../pocketbase/students/lib/services/database_crud.dart';
+import '../../pocketbase/students/lib/services/pocketbase_database_adapter.dart';
 
 /// Database Abstraction Demo Functions
 /// Shows how to use the same code with different database backends
 /// This demonstrates the power of interface-based programming
 
 /// Demo using database abstraction - works with any DatabaseService implementation
-Future<void> runDatabaseDemo(DatabaseService db, String dbName) async {
+Future<void> runDatabaseDemo(DatabaseCrudService db, String dbName) async {
   print('\n🔀 === Database Abstraction Demo with $dbName ===');
 
   try {
@@ -86,13 +86,13 @@ Future<void> demonstrateDatabaseSwitching() async {
 
   // Example 1: Using Mock database for testing
   print('\n🧪 Testing with Mock database...');
-  DatabaseService mockDb = createMockDatabase();
+  DatabaseCrudService mockDb = createMockDatabase();
   await runDatabaseDemo(mockDb, 'Mock');
 
   // Example 2: Using PocketBase
   print('\n📦 Testing with PocketBase adapter...');
   try {
-    DatabaseService pocketbaseDb = PocketBaseDatabaseAdapter();
+    DatabaseCrudService pocketbaseDb = PocketBaseDatabaseAdapter();
     await runDatabaseDemo(pocketbaseDb, 'PocketBase');
   } catch (e) {
     print('⚠️ PocketBase not configured or unavailable: $e');
@@ -115,7 +115,7 @@ Future<void> demonstrateDatabaseSwitching() async {
 }
 
 /// Example of a business logic function that is database-agnostic
-Future<void> demonstrateBusinessLogic(DatabaseService db) async {
+Future<void> demonstrateBusinessLogic(DatabaseCrudService db) async {
   print('\n💼 === Business Logic Example ===');
   print('This function works with ANY database implementation');
 
@@ -130,7 +130,7 @@ Future<void> demonstrateBusinessLogic(DatabaseService db) async {
 }
 
 /// Business logic: Promote top students to advanced courses
-Future<void> promoteTopStudents(DatabaseService db) async {
+Future<void> promoteTopStudents(DatabaseCrudService db) async {
   print('\n🎓 Promoting top students...');
 
   try {
@@ -154,7 +154,7 @@ Future<void> promoteTopStudents(DatabaseService db) async {
 }
 
 /// Business logic: Generate a student report
-Future<void> generateStudentReport(DatabaseService db) async {
+Future<void> generateStudentReport(DatabaseCrudService db) async {
   print('\n📊 Generating student report...');
 
   try {
@@ -187,7 +187,7 @@ Future<void> generateStudentReport(DatabaseService db) async {
 }
 
 /// Demo showing advanced database operations
-Future<void> demonstrateAdvancedOperations(DatabaseService db) async {
+Future<void> demonstrateAdvancedOperations(DatabaseCrudService db) async {
   print('\n🚀 === Advanced Operations Demo ===');
 
   try {
@@ -236,7 +236,7 @@ Future<void> demonstrateAdvancedOperations(DatabaseService db) async {
 }
 
 /// Create mock database service for testing
-DatabaseService createMockDatabase() {
+DatabaseCrudService createMockDatabase() {
   return MockDatabaseService();
 }
 
@@ -251,7 +251,7 @@ Future<void> runComprehensiveDemo() async {
 
     // Demo 2: Business logic that works with any database
     print('\n' + '=' * 50);
-    DatabaseService mockDb = createMockDatabase();
+    DatabaseCrudService mockDb = createMockDatabase();
     await demonstrateBusinessLogic(mockDb);
 
     // Demo 3: Advanced operations
@@ -273,7 +273,7 @@ Future<void> runComprehensiveDemo() async {
 
 /// Mock database service for testing and demos
 /// This implementation stores data in memory and simulates database operations
-class MockDatabaseService implements DatabaseService {
+class MockDatabaseService implements DatabaseCrudService {
   final List<Student> _students = [];
   int _idCounter = 1;
   bool _isInitialized = false;

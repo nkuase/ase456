@@ -1,20 +1,20 @@
-import '../models/student.dart';
-import 'database_service.dart';
-import 'pocketbase_student_service.dart';
+import '../../pocketbase/students/lib/models/student.dart';
+import 'database_crud.dart';
+import '../../pocketbase/students/lib/services/pocketbase_crud_service.dart';
 
 /// PocketBase Database Service Adapter
 /// Wraps the static PocketBaseStudentService to implement DatabaseService interface
 /// This allows the existing static service to work with the interface pattern
-class PocketBaseDatabaseAdapter implements DatabaseService {
+class PocketBaseDatabaseAdapter implements DatabaseCrudService {
   
   @override
   Future<void> initialize() async {
-    await PocketBaseStudentService.initialize();
+    await PocketBaseCrudService.initialize();
   }
   
   @override
   String generateId() {
-    return PocketBaseStudentService.generateId();
+    return PocketBaseCrudService.generateId();
   }
   
   // ===============================
@@ -23,17 +23,17 @@ class PocketBaseDatabaseAdapter implements DatabaseService {
   
   @override
   Future<String> createStudent(Student student) async {
-    return await PocketBaseStudentService.createStudent(student);
+    return await PocketBaseCrudService.createStudent(student);
   }
   
   @override
   Future<void> createStudentWithId(Student student) async {
-    await PocketBaseStudentService.createStudentWithId(student);
+    await PocketBaseCrudService.createStudentWithId(student);
   }
   
   @override
   Future<void> createMultipleStudents(List<Student> students) async {
-    await PocketBaseStudentService.createMultipleStudents(students);
+    await PocketBaseCrudService.createMultipleStudents(students);
   }
   
   // ===============================
@@ -42,37 +42,37 @@ class PocketBaseDatabaseAdapter implements DatabaseService {
   
   @override
   Future<List<Student>> getAllStudents() async {
-    return await PocketBaseStudentService.getAllStudents();
+    return await PocketBaseCrudService.getAllStudents();
   }
   
   @override
   Future<Student?> getStudentById(String id) async {
-    return await PocketBaseStudentService.getStudentById(id);
+    return await PocketBaseCrudService.getStudentById(id);
   }
   
   @override
   Future<List<Student>> getStudentsByMajor(String major) async {
-    return await PocketBaseStudentService.getStudentsByMajor(major);
+    return await PocketBaseCrudService.getStudentsByMajor(major);
   }
   
   @override
   Future<List<Student>> getStudentsByAgeRange(int minAge, int maxAge) async {
-    return await PocketBaseStudentService.getStudentsByAgeRange(minAge, maxAge);
+    return await PocketBaseCrudService.getStudentsByAgeRange(minAge, maxAge);
   }
   
   @override
   Future<List<Student>> searchStudentsByName(String nameQuery) async {
-    return await PocketBaseStudentService.searchStudentsByName(nameQuery);
+    return await PocketBaseCrudService.searchStudentsByName(nameQuery);
   }
   
   @override
   Stream<List<Student>> getStudentsStream() {
-    return PocketBaseStudentService.getStudentsStream();
+    return PocketBaseCrudService.getStudentsStream();
   }
   
   @override
   Future<int> getStudentCount() async {
-    return await PocketBaseStudentService.getStudentCount();
+    return await PocketBaseCrudService.getStudentCount();
   }
   
   // ===============================
@@ -81,22 +81,22 @@ class PocketBaseDatabaseAdapter implements DatabaseService {
   
   @override
   Future<void> updateStudent(String id, Map<String, dynamic> updates) async {
-    await PocketBaseStudentService.updateStudent(id, updates);
+    await PocketBaseCrudService.updateStudent(id, updates);
   }
   
   @override
   Future<void> updateEntireStudent(Student student) async {
-    await PocketBaseStudentService.updateEntireStudent(student);
+    await PocketBaseCrudService.updateEntireStudent(student);
   }
   
   @override
   Future<void> incrementStudentAge(String id) async {
-    await PocketBaseStudentService.incrementStudentAge(id);
+    await PocketBaseCrudService.incrementStudentAge(id);
   }
   
   @override
   Future<void> transferStudentMajor(String studentId, String newMajor) async {
-    await PocketBaseStudentService.transferStudentMajor(studentId, newMajor);
+    await PocketBaseCrudService.transferStudentMajor(studentId, newMajor);
   }
   
   // ===============================
@@ -105,16 +105,16 @@ class PocketBaseDatabaseAdapter implements DatabaseService {
   
   @override
   Future<void> deleteStudent(String id) async {
-    await PocketBaseStudentService.deleteStudent(id);
+    await PocketBaseCrudService.deleteStudent(id);
   }
   
   @override
   Future<void> deleteAllStudents() async {
-    await PocketBaseStudentService.deleteAllStudents();
+    await PocketBaseCrudService.deleteAllStudents();
   }
   
   @override
   Future<int> deleteStudentsByMajor(String major) async {
-    return await PocketBaseStudentService.deleteStudentsByMajor(major);
+    return await PocketBaseCrudService.deleteStudentsByMajor(major);
   }
 }

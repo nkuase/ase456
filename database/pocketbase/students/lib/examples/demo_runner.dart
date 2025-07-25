@@ -1,5 +1,5 @@
-import '../examples/database_abstraction_demo.dart';
-import '../services/database_service.dart';
+import '../../../../advanced/advanced/database_abstraction_demo.dart';
+import '../../../../advanced/pocketbase/database_crud.dart';
 
 /// Main demo runner to show database abstraction in action
 /// This file demonstrates how to run the database abstraction examples
@@ -24,7 +24,7 @@ Future<void> runIndividualDemos() async {
 
   try {
     // Create a mock database for testing
-    DatabaseService mockDb = createMockDatabase();
+    DatabaseCrudService mockDb = createMockDatabase();
 
     // Run individual demos
     await runDatabaseDemo(mockDb, 'Mock');

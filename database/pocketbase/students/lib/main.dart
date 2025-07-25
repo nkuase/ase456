@@ -1,7 +1,7 @@
 import 'examples/pocketbase_examples.dart';
-import 'examples/database_abstraction_demo.dart';
+import '../../../advanced/advanced/database_abstraction_demo.dart';
 import 'models/student.dart';
-import 'services/pocketbase_student_service.dart';
+import 'services/pocketbase_crud_service.dart';
 
 /// Main entry point for PocketBase Student Example
 ///
@@ -25,7 +25,7 @@ void main() async {
   try {
     // Initialize PocketBase
     print('🚀 Initializing PocketBase...');
-    await PocketBaseStudentService.initialize();
+    await PocketBaseCrudService.initialize();
     print('✅ PocketBase initialized successfully\n');
 
     // Demo menu
@@ -116,7 +116,7 @@ Future<void> runOfflineExamples() async {
 
   // Demonstrate toMap
   print('\n📄 Student as Map:');
-  print('  ${mockStudents.first.toMap()}');
+  print('  ${mockStudents.first.toJson()}');
 
   // Demonstrate copyWith
   print('\n✏️ Copying student with new age:');
@@ -192,7 +192,7 @@ Future<void> _demonstrateCreate() async {
   );
 
   try {
-    String id = await PocketBaseStudentService.createStudent(newStudent);
+    String id = await PocketBaseCrudService.createStudent(newStudent);
     print('✅ Created student with ID: $id');
   } catch (e) {
     print('❌ Create failed: $e');
@@ -204,7 +204,7 @@ Future<void> _demonstrateRead() async {
   print('======================');
 
   try {
-    List<Student> students = await PocketBaseStudentService.getAllStudents();
+    List<Student> students = await PocketBaseCrudService.getAllStudents();
     print('✅ Retrieved ${students.length} students');
     for (Student student in students.take(3)) {
       print('  $student');
@@ -219,10 +219,10 @@ Future<void> _demonstrateUpdate() async {
   print('========================');
 
   try {
-    List<Student> students = await PocketBaseStudentService.getAllStudents();
+    List<Student> students = await PocketBaseCrudService.getAllStudents();
     if (students.isNotEmpty) {
       String id = students.first.id;
-      await PocketBaseStudentService.updateStudent(id, {'age': 25});
+      await PocketBaseCrudService.updateStudent(id, {'age': 25});
       print('✅ Updated student $id');
     } else {
       print('⚠️ No students to update');
@@ -237,10 +237,10 @@ Future<void> _demonstrateDelete() async {
   print('========================');
 
   try {
-    List<Student> students = await PocketBaseStudentService.getAllStudents();
+    List<Student> students = await PocketBaseCrudService.getAllStudents();
     if (students.isNotEmpty) {
       String id = students.last.id;
-      await PocketBaseStudentService.deleteStudent(id);
+      await PocketBaseCrudService.deleteStudent(id);
       print('✅ Deleted student $id');
     } else {
       print('⚠️ No students to delete');

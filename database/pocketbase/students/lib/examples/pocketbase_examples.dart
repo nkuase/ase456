@@ -1,5 +1,5 @@
 import '../models/student.dart';
-import '../services/pocketbase_student_service.dart';
+import '../services/pocketbase_crud_service.dart';
 
 /// PocketBase Examples
 /// Demonstrates practical usage of PocketBase CRUD operations
@@ -30,42 +30,42 @@ class PocketBaseExamples {
         createdAt: DateTime.now(),
       );
       
-      String aliceId = await PocketBaseStudentService.createStudent(alice);
-      String bobId = await PocketBaseStudentService.createStudent(bob);
+      String aliceId = await PocketBaseCrudService.createStudent(alice);
+      String bobId = await PocketBaseCrudService.createStudent(bob);
       
       // 2. READ - Get all students
       print('\n2️⃣ Reading all students...');
-      List<Student> allStudents = await PocketBaseStudentService.getAllStudents();
+      List<Student> allStudents = await PocketBaseCrudService.getAllStudents();
       for (Student student in allStudents) {
         print('  📖 $student');
       }
       
       // 3. READ - Get specific student
       print('\n3️⃣ Reading specific student...');
-      Student? foundAlice = await PocketBaseStudentService.getStudentById(aliceId);
+      Student? foundAlice = await PocketBaseCrudService.getStudentById(aliceId);
       if (foundAlice != null) {
         print('  📖 Found: $foundAlice');
       }
       
       // 4. UPDATE - Update student age
       print('\n4️⃣ Updating student...');
-      await PocketBaseStudentService.updateStudent(aliceId, {
+      await PocketBaseCrudService.updateStudent(aliceId, {
         'age': 21,
         'major': 'Data Science'
       });
       
       // Verify update
-      Student? updatedAlice = await PocketBaseStudentService.getStudentById(aliceId);
+      Student? updatedAlice = await PocketBaseCrudService.getStudentById(aliceId);
       if (updatedAlice != null) {
         print('  📝 Updated: $updatedAlice');
       }
       
       // 5. DELETE - Remove one student
       print('\n5️⃣ Deleting student...');
-      await PocketBaseStudentService.deleteStudent(bobId);
+      await PocketBaseCrudService.deleteStudent(bobId);
       
       // Verify deletion
-      List<Student> remainingStudents = await PocketBaseStudentService.getAllStudents();
+      List<Student> remainingStudents = await PocketBaseCrudService.getAllStudents();
       print('  🗑️ Remaining students: ${remainingStudents.length}');
       
     } catch (e) {
@@ -111,31 +111,31 @@ class PocketBaseExamples {
       ];
       
       // Create multiple students using batch
-      await PocketBaseStudentService.createMultipleStudents(sampleStudents);
+      await PocketBaseCrudService.createMultipleStudents(sampleStudents);
       
       // Query by major
       print('\n1️⃣ Students in Computer Science:');
-      List<Student> csStudents = await PocketBaseStudentService.getStudentsByMajor('Computer Science');
+      List<Student> csStudents = await PocketBaseCrudService.getStudentsByMajor('Computer Science');
       for (Student student in csStudents) {
         print('  👨‍💻 $student');
       }
       
       // Query by age range
       print('\n2️⃣ Students aged 20-22:');
-      List<Student> youngStudents = await PocketBaseStudentService.getStudentsByAgeRange(20, 22);
+      List<Student> youngStudents = await PocketBaseCrudService.getStudentsByAgeRange(20, 22);
       for (Student student in youngStudents) {
         print('  🎓 $student');
       }
       
       // Search by name
       print('\n3️⃣ Students with names containing "Ch":');
-      List<Student> charlieStudents = await PocketBaseStudentService.searchStudentsByName('Ch');
+      List<Student> charlieStudents = await PocketBaseCrudService.searchStudentsByName('Ch');
       for (Student student in charlieStudents) {
         print('  🔎 $student');
       }
       
       // Count students
-      int totalStudents = await PocketBaseStudentService.getStudentCount();
+      int totalStudents = await PocketBaseCrudService.getStudentCount();
       print('\n📊 Total students in database: $totalStudents');
       
     } catch (e) {
@@ -151,7 +151,7 @@ class PocketBaseExamples {
       print('Setting up real-time listener...');
       
       // Set up real-time listener (simulated)
-      var subscription = PocketBaseStudentService.getStudentsStream().listen(
+      var subscription = PocketBaseCrudService.getStudentsStream().listen(
         (students) {
           print('\n📡 Real-time update received:');
           print('   Total students: ${students.length}');
@@ -179,11 +179,11 @@ class PocketBaseExamples {
         major: 'Computer Science',
         createdAt: DateTime.now(),
       );
-      String graceId = await PocketBaseStudentService.createStudent(newStudent);
+      String graceId = await PocketBaseCrudService.createStudent(newStudent);
       
       // Update the student
       await Future.delayed(Duration(seconds: 2));
-      await PocketBaseStudentService.updateStudent(graceId, {
+      await PocketBaseCrudService.updateStudent(graceId, {
         'age': 26,
       });
       
@@ -205,7 +205,7 @@ class PocketBaseExamples {
     
     try {
       // Get current student count
-      int initialCount = await PocketBaseStudentService.getStudentCount();
+      int initialCount = await PocketBaseCrudService.getStudentCount();
       print('Initial student count: $initialCount');
       
       // Batch operation - create multiple students
@@ -234,37 +234,37 @@ class PocketBaseExamples {
         ),
       ];
       
-      await PocketBaseStudentService.createMultipleStudents(batchStudents);
+      await PocketBaseCrudService.createMultipleStudents(batchStudents);
       
       // Verify batch creation
-      int afterBatchCount = await PocketBaseStudentService.getStudentCount();
+      int afterBatchCount = await PocketBaseCrudService.getStudentCount();
       print('After batch: $afterBatchCount students (+${afterBatchCount - initialCount})');
       
       // Transaction example - transfer student to new major
       print('\n2️⃣ Transaction example...');
-      List<Student> engineeringStudents = await PocketBaseStudentService.getStudentsByMajor('Engineering');
+      List<Student> engineeringStudents = await PocketBaseCrudService.getStudentsByMajor('Engineering');
       if (engineeringStudents.isNotEmpty) {
         String studentId = engineeringStudents.first.id;
-        await PocketBaseStudentService.transferStudentMajor(studentId, 'Computer Engineering');
+        await PocketBaseCrudService.transferStudentMajor(studentId, 'Computer Engineering');
         print('Transferred student to Computer Engineering');
       }
       
       // Increment age example
       print('\n3️⃣ Increment age example...');
-      List<Student> allStudents = await PocketBaseStudentService.getAllStudents();
+      List<Student> allStudents = await PocketBaseCrudService.getAllStudents();
       if (allStudents.isNotEmpty) {
         String studentId = allStudents.first.id;
-        await PocketBaseStudentService.incrementStudentAge(studentId);
+        await PocketBaseCrudService.incrementStudentAge(studentId);
         print('Incremented age for student: ${allStudents.first.name}');
       }
       
       // Clean up - delete students by major
       print('\n4️⃣ Cleanup - deleting Business students...');
-      int deletedCount = await PocketBaseStudentService.deleteStudentsByMajor('Business');
+      int deletedCount = await PocketBaseCrudService.deleteStudentsByMajor('Business');
       print('Deleted $deletedCount Business students');
       
       // Final count
-      int finalCount = await PocketBaseStudentService.getStudentCount();
+      int finalCount = await PocketBaseCrudService.getStudentCount();
       print('\nFinal student count: $finalCount');
       
     } catch (e) {
@@ -279,7 +279,7 @@ class PocketBaseExamples {
     try {
       // Try to get a non-existent student
       print('1️⃣ Attempting to get non-existent student...');
-      Student? nonExistent = await PocketBaseStudentService.getStudentById('non-existent-id');
+      Student? nonExistent = await PocketBaseCrudService.getStudentById('non-existent-id');
       if (nonExistent == null) {
         print('✅ Correctly handled: Student not found');
       }
@@ -287,7 +287,7 @@ class PocketBaseExamples {
       // Try to update a non-existent student
       print('\n2️⃣ Attempting to update non-existent student...');
       try {
-        await PocketBaseStudentService.updateStudent('non-existent-id', {'age': 25});
+        await PocketBaseCrudService.updateStudent('non-existent-id', {'age': 25});
       } catch (e) {
         print('✅ Correctly caught update error: $e');
       }
@@ -295,7 +295,7 @@ class PocketBaseExamples {
       // Try to delete a non-existent student
       print('\n3️⃣ Attempting to delete non-existent student...');
       try {
-        await PocketBaseStudentService.deleteStudent('non-existent-id');
+        await PocketBaseCrudService.deleteStudent('non-existent-id');
       } catch (e) {
         print('✅ Correctly caught delete error: $e');
       }
@@ -311,7 +311,7 @@ class PocketBaseExamples {
     
     try {
       print('Setting up students collection...');
-      await PocketBaseStudentService.setupCollection();
+      await PocketBaseCrudService.setupCollection();
       print('✅ Collection setup completed');
       
     } catch (e) {
@@ -324,7 +324,7 @@ class PocketBaseExamples {
     print('🚀 Starting PocketBase Examples...\n');
     
     // Initialize service
-    await PocketBaseStudentService.initialize();
+    await PocketBaseCrudService.initialize();
     
     // Setup collection (this might fail if already exists, which is fine)
     await setupExample();
@@ -343,7 +343,7 @@ class PocketBaseExamples {
   static Future<void> cleanupDatabase() async {
     print('\n🧹 Cleaning up database...');
     try {
-      await PocketBaseStudentService.deleteAllStudents();
+      await PocketBaseCrudService.deleteAllStudents();
       print('✅ Database cleanup completed');
     } catch (e) {
       print('❌ Cleanup failed: $e');

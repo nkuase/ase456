@@ -28,7 +28,7 @@ void main() {
     });
 
     test('should convert student to map correctly', () {
-      final map = testStudent.toMap();
+      final map = testStudent.toJson();
       
       expect(map['name'], equals('Alice Johnson'));
       expect(map['age'], equals(20));
@@ -47,7 +47,7 @@ void main() {
         'createdAt': testTime.toIso8601String(),
       };
       
-      final student = Student.fromMap(map, 'bob-456');
+      final student = Student.fromJson(map, 'bob-456');
       
       expect(student.id, equals('bob-456'));
       expect(student.name, equals('Bob Smith'));
@@ -120,7 +120,7 @@ void main() {
         // Missing age, major, createdAt
       };
       
-      final student = Student.fromMap(incompleteMap, 'charlie-789');
+      final student = Student.fromJson(incompleteMap, 'charlie-789');
       
       expect(student.id, equals('charlie-789'));
       expect(student.name, equals('Charlie Brown'));
@@ -138,7 +138,7 @@ void main() {
         'createdAt': null,
       };
       
-      final student = Student.fromMap(mapWithNulls, 'null-test');
+      final student = Student.fromJson(mapWithNulls, 'null-test');
       
       expect(student.id, equals('null-test'));
       expect(student.name, equals('')); // Null coalescing to empty string
@@ -160,7 +160,7 @@ void main() {
       );
       
       expect(student.name.length, equals(1000));
-      expect(student.toMap()['name'], equals(longName));
+      expect(student.toJson()['name'], equals(longName));
     });
 
     test('should handle edge case ages', () {
@@ -196,8 +196,8 @@ void main() {
       expect(specialStudent.name, contains('José'));
       expect(specialStudent.major, contains('&'));
       
-      final map = specialStudent.toMap();
-      final reconstructed = Student.fromMap(map, specialStudent.id);
+      final map = specialStudent.toJson();
+      final reconstructed = Student.fromJson(map, specialStudent.id);
       
       expect(reconstructed.name, equals(specialStudent.name));
       expect(reconstructed.major, equals(specialStudent.major));
@@ -232,7 +232,7 @@ void main() {
       expect(newStudent.id, equals(''));
       
       // When converted to map, ID should not be included
-      final map = newStudent.toMap();
+      final map = newStudent.toJson();
       expect(map.containsKey('id'), isFalse);
     });
   });

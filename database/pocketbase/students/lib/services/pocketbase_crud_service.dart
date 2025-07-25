@@ -3,30 +3,35 @@ import '../models/student.dart';
 
 /// PocketBase Student Service
 /// Provides CRUD operations for Student data in PocketBase
-/// Demonstrates PocketBase patterns and best practices
-class PocketBaseStudentService {
-  static final PocketBase _pb = PocketBase('http://127.0.0.1:8090');
-  static const String _collection = 'students';
+/// Demonstrates PocketBase patterns and best practices using instance-based design
+class PocketBaseCrudService {
+  // Instance variables instead of static
+  final PocketBase _pb;
+  final String _collection = 'students';
+  
+  // Constructor - this makes it an instance-based class
+  PocketBaseCrudService({
+    String baseUrl = 'http://127.0.0.1:8090',
+  }) : _pb = PocketBase(baseUrl);
   
   /// Get reference to students collection
-  static RecordService get _studentsRef =>
-      _pb.collection(_collection);
+  RecordService get _studentsRef => _pb.collection(_collection);
 
   /// Generate new student ID
-  static String generateId() {
+  String generateId() {
     // PocketBase generates IDs automatically, but we can simulate it
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   /// Initialize service (can be used for setup)
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
     try {
       // Test connection
       await _pb.health.check();
       
       // Try to authenticate with admin user (optional)
       try {
-        await _pb.admins.authWithPassword(
+        await _pb.collection('_superusers').authWithPassword(
           'admin@example.com', 
           'admin123456'
         );
@@ -47,9 +52,9 @@ class PocketBaseStudentService {
   // ===============================
 
   /// CREATE: Add new student to PocketBase with auto-generated ID
-  static Future<String> createStudent(Student student) async {
+  Future<String> createStudent(Student student) async {
     try {
-      final record = await _studentsRef.create(body: student.toMap());
+      final record = await _studentsRef.create(body: student.toJson());
       
       print('✅ CREATE: Student added with ID: ${record.id}');
       return record.id;
@@ -61,10 +66,10 @@ class PocketBaseStudentService {
   }
 
   /// CREATE: Add student with specific ID
-  static Future<void> createStudentWithId(Student student) async {
+  Future<void> createStudentWithId(Student student) async {
     try {
       await _studentsRef.create(body: {
-        ...student.toMap(),
+        ...student.toJson(),
         'id': student.id, // Include ID in body for PocketBase
       });
       
@@ -81,7 +86,7 @@ class PocketBaseStudentService {
   // ===============================
 
   /// READ: Get all students (one-time fetch)
-  static Future<List<Student>> getAllStudents() async {
+  Future<List<Student>> getAllStudents() async {
     try {
       final result = await _studentsRef.getList(
         page: 1,
@@ -104,7 +109,7 @@ class PocketBaseStudentService {
 
   /// READ: Stream of students (simulated real-time updates)
   /// Note: PocketBase has real-time subscriptions but this simulates it
-  static Stream<List<Student>> getStudentsStream() async* {
+  Stream<List<Student>> getStudentsStream() async* {
     while (true) {
       try {
         yield await getAllStudents();
@@ -118,7 +123,7 @@ class PocketBaseStudentService {
   }
 
   /// READ: Get specific student by ID
-  static Future<Student?> getStudentById(String id) async {
+  Future<Student?> getStudentById(String id) async {
     try {
       final record = await _studentsRef.getOne(id);
       
@@ -137,7 +142,7 @@ class PocketBaseStudentService {
   }
 
   /// READ: Get students by major
-  static Future<List<Student>> getStudentsByMajor(String major) async {
+  Future<List<Student>> getStudentsByMajor(String major) async {
     try {
       final result = await _studentsRef.getList(
         page: 1,
@@ -160,7 +165,7 @@ class PocketBaseStudentService {
   }
 
   /// READ: Get students by age range
-  static Future<List<Student>> getStudentsByAgeRange(int minAge, int maxAge) async {
+  Future<List<Student>> getStudentsByAgeRange(int minAge, int maxAge) async {
     try {
       final result = await _studentsRef.getList(
         page: 1,
@@ -187,7 +192,7 @@ class PocketBaseStudentService {
   // ===============================
 
   /// UPDATE: Update specific fields of a student
-  static Future<void> updateStudent(String id, Map<String, dynamic> updates) async {
+  Future<void> updateStudent(String id, Map<String, dynamic> updates) async {
     try {
       await _studentsRef.update(id, body: updates);
       print('✅ UPDATE: Student $id updated successfully');
@@ -199,9 +204,9 @@ class PocketBaseStudentService {
   }
 
   /// UPDATE: Update entire student document
-  static Future<void> updateEntireStudent(Student student) async {
+  Future<void> updateEntireStudent(Student student) async {
     try {
-      await _studentsRef.update(student.id, body: student.toMap());
+      await _studentsRef.update(student.id, body: student.toJson());
       print('✅ UPDATE: Student ${student.id} replaced successfully');
       
     } catch (e) {
@@ -211,7 +216,7 @@ class PocketBaseStudentService {
   }
 
   /// UPDATE: Increment student age
-  static Future<void> incrementStudentAge(String id) async {
+  Future<void> incrementStudentAge(String id) async {
     try {
       // PocketBase doesn't have FieldValue.increment, so we need to fetch then update
       final student = await getStudentById(id);
@@ -233,7 +238,7 @@ class PocketBaseStudentService {
   // ===============================
 
   /// DELETE: Remove student by ID
-  static Future<void> deleteStudent(String id) async {
+  Future<void> deleteStudent(String id) async {
     try {
       await _studentsRef.delete(id);
       print('✅ DELETE: Student $id deleted successfully');
@@ -245,7 +250,7 @@ class PocketBaseStudentService {
   }
 
   /// DELETE: Remove all students (batch operation)
-  static Future<void> deleteAllStudents() async {
+  Future<void> deleteAllStudents() async {
     try {
       int page = 1;
       int totalDeleted = 0;
@@ -273,7 +278,7 @@ class PocketBaseStudentService {
   }
 
   /// DELETE: Remove students by major
-  static Future<int> deleteStudentsByMajor(String major) async {
+  Future<int> deleteStudentsByMajor(String major) async {
     try {
       final studentsToDelete = await getStudentsByMajor(major);
       
@@ -295,7 +300,7 @@ class PocketBaseStudentService {
   // ===============================
 
   /// COUNT: Get total number of students
-  static Future<int> getStudentCount() async {
+  Future<int> getStudentCount() async {
     try {
       final result = await _studentsRef.getList(page: 1, perPage: 1);
       int count = result.totalItems;
@@ -309,7 +314,7 @@ class PocketBaseStudentService {
   }
 
   /// SEARCH: Search students by name (partial match)
-  static Future<List<Student>> searchStudentsByName(String nameQuery) async {
+  Future<List<Student>> searchStudentsByName(String nameQuery) async {
     try {
       final result = await _studentsRef.getList(
         page: 1,
@@ -336,11 +341,11 @@ class PocketBaseStudentService {
   // ===============================
 
   /// BATCH: Create multiple students at once
-  static Future<void> createMultipleStudents(List<Student> students) async {
+  Future<void> createMultipleStudents(List<Student> students) async {
     try {
       // PocketBase doesn't have batch operations, so we create them one by one
       for (Student student in students) {
-        await _studentsRef.create(body: student.toMap());
+        await _studentsRef.create(body: student.toJson());
       }
       
       print('✅ BATCH CREATE: ${students.length} students created successfully');
@@ -353,7 +358,7 @@ class PocketBaseStudentService {
 
   /// TRANSACTION: Transfer student between majors
   /// Note: PocketBase doesn't have transactions, so this is a simulation
-  static Future<void> transferStudentMajor(String studentId, String newMajor) async {
+  Future<void> transferStudentMajor(String studentId, String newMajor) async {
     try {
       // Simulate transaction by updating directly
       await updateStudent(studentId, {'major': newMajor});
@@ -370,7 +375,7 @@ class PocketBaseStudentService {
   // ===============================
 
   /// Setup the students collection with proper schema
-  static Future<void> setupCollection() async {
+  Future<void> setupCollection() async {
     try {
       await _pb.collections.create(body: {
         'name': _collection,
@@ -426,5 +431,31 @@ class PocketBaseStudentService {
         throw Exception('Failed to setup collection: $e');
       }
     }
+  }
+
+  // ===============================
+  // Instance-specific helper methods
+  // ===============================
+
+  /// Check if service is properly initialized
+  bool get isInitialized => _pb.authStore.isValid;
+
+  /// Get current PocketBase URL
+  String get baseUrl => _pb.baseUrl;
+
+  /// Get connection status
+  Future<bool> checkConnection() async {
+    try {
+      await _pb.health.check();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Dispose resources (good practice for cleanup)
+  void dispose() {
+    // Clean up any resources if needed
+    // PocketBase doesn't require explicit disposal but good practice to have this method
   }
 }
