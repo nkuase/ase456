@@ -5,9 +5,8 @@ import '../services/pocketbase_crud_service.dart';
 /// Demonstrates practical usage of PocketBase CRUD operations
 /// These examples show how to use the PocketBaseStudentService
 class PocketBaseExamples {
-  
   /// Example 1: Basic CRUD Operations
-  static Future<void> basicCrudExample() async {
+  Future<void> basicCrudExample() async {
     print('\n📚 === Basic CRUD Example ===');
     
     try {
@@ -30,9 +29,23 @@ class PocketBaseExamples {
         createdAt: DateTime.now(),
       );
       
-      String aliceId = await PocketBaseCrudService.createStudent(alice);
-      String bobId = await PocketBaseCrudService.createStudent(bob);
-      
+      var pb = PocketBaseCrudService();
+      await pb.initialize();
+
+      String aliceId = await pb.createStudent(alice);
+      String bobId = await pb.createStudent(bob);
+      print('  ✅ Created Alice with ID: $aliceId');
+      print('  ✅ Created Bob with ID: $bobId');
+    } catch (e) {
+      print('❌ Basic CRUD Example failed: $e');
+    }    
+  }
+}
+void main() async {
+  PocketBaseExamples examples = PocketBaseExamples();
+  await examples.basicCrudExample();
+}
+      /*
       // 2. READ - Get all students
       print('\n2️⃣ Reading all students...');
       List<Student> allStudents = await PocketBaseCrudService.getAllStudents();
@@ -349,4 +362,5 @@ class PocketBaseExamples {
       print('❌ Cleanup failed: $e');
     }
   }
-}
+  */
+

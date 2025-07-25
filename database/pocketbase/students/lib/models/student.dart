@@ -33,22 +33,10 @@ class Student {
     };
   }
 
-  /// Create Student from PocketBase RecordModel
-  /// This is used when reading data from PocketBase
-  factory Student.fromRecord(RecordModel record) {
+  /// record.model is used to convert a Map to a Student object
+  factory Student.fromJson(Map<String, dynamic> map) {
     return Student(
-      id: record.id,
-      name: record.data['name'] as String? ?? '',
-      age: record.data['age'] as int? ?? 0,
-      major: record.data['major'] as String? ?? '',
-      createdAt: _parseDateTime(record.data['createdAt']),
-    );
-  }
-
-  /// Create Student from Map (useful for testing)
-  factory Student.fromJson(Map<String, dynamic> map, String id) {
-    return Student(
-      id: id,
+      id: map['id'] as String? ?? '',
       name: map['name'] as String? ?? '',
       age: map['age'] as int? ?? 0,
       major: map['major'] as String? ?? '',
