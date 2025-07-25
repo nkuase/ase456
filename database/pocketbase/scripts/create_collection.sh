@@ -5,16 +5,36 @@ TOKEN=$(curl -s -X POST "http://127.0.0.1:8090/api/collections/_superusers/auth-
   -H "Content-Type: application/json" \
   -d '{"identity": "admin@example.com", "password": "admin123456"}' | \
   grep -o '"token":"[^"]*' | cut -d'"' -f4)
-
 echo "✅ Token received!"
 
-echo "📝 Updating students collection with fields..."
+# Check if students collection exists
+echo "🔍 Checking if students collection exists..."
+COLLECTION_EXISTS=$(curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://127.0.0.1:8090/api/collections/students" | grep -c '"name":"students"')
 
-# Update the collection with proper field schema
-curl -X PATCH "http://127.0.0.1:8090/api/collections/students" \
+if [ $COLLECTION_EXISTS -eq 1 ]; then
+    echo "⚠️  Students collection already exists!"
+    read -p "Do you want to delete and recreate it? (y/n): " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "❌ Operation cancelled."
+        exit 0
+    fi
+    
+    echo "🗑️  Deleting existing students collection..."
+    curl -X DELETE "http://127.0.0.1:8090/api/collections/students" \
+      -H "Authorization: Bearer $TOKEN"
+    echo -e "\n✅ Collection deleted!"
+fi
+
+echo "📝 Creating students collection with fields..."
+curl -X POST "http://127.0.0.1:8090/api/collections" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
+    "name": "students",
+    "type": "base",      
     "fields": [
       {
         "name": "id",
@@ -52,8 +72,7 @@ curl -X PATCH "http://127.0.0.1:8090/api/collections/students" \
       }
     ]
   }'
-
-echo -e "\n✅ Collection updated!"
+echo -e "\n✅ Collection created!"
 
 echo "🔍 Verifying collection structure..."
 curl -H "Authorization: Bearer $TOKEN" \

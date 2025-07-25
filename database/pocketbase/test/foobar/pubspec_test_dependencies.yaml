@@ -1,0 +1,19 @@
+# Simple Test Dependencies for FooBar Project
+
+name: foobar_test
+description: Simple unit tests for FooBar CRUD and Utility classes
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  # Main dependencies (would be in your main pubspec.yaml)
+  pocketbase: ^0.18.2
+
+dev_dependencies:
+  # Testing framework - this is all you need!
+  test: ^1.24.0
+
+# Note: This simplified version doesn't require mockito or build_runner
+# Perfect for students learning testing basics!

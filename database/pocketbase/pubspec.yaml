@@ -10,11 +10,11 @@ dependencies:
   pocketbase: ^0.23.0
   
   # Utility packages
-  uuid: ^3.0.7
-  intl: ^0.18.1
+  uuid: ^4.5.1
+  intl: ^0.20.2
 
 dev_dependencies:
-  lints: ^2.0.0
+  lints: ^6.0.0
   test: ^1.21.0
 
 # This is only needed if you plan to make this a Flutter app

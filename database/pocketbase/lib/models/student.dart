@@ -3,10 +3,10 @@ import 'package:pocketbase/pocketbase.dart';
 /// Student model for PocketBase
 /// Demonstrates how to create a data model that works with PocketBase
 class Student {
-  final String id;        // Document ID
-  final String name;      // Student name  
-  final int age;          // Student age
-  final String major;     // Student's major
+  final String id; // Document ID
+  final String name; // Student name
+  final int age; // Student age
+  final String major; // Student's major
   final DateTime createdAt; // Timestamp
 
   const Student({
@@ -33,11 +33,10 @@ class Student {
   factory Student.fromRecord(RecordModel record) {
     return Student(
       id: record.id,
-      name: record.data['name'] ?? '',
-      age: record.data['age'] ?? 0,
-      major: record.data['major'] ?? '',
-      createdAt: DateTime.parse(record.data['createdAt'] ?? 
-                 DateTime.now().toIso8601String()),
+      name: record.data['name'] as String? ?? '',
+      age: record.data['age'] as int? ?? 0,
+      major: record.data['major'] as String? ?? '',
+      createdAt: _parseDateTime(record.data['createdAt']),
     );
   }
 
@@ -45,12 +44,37 @@ class Student {
   factory Student.fromMap(Map<String, dynamic> map, String id) {
     return Student(
       id: id,
-      name: map['name'] ?? '',
-      age: map['age'] ?? 0,
-      major: map['major'] ?? '',
-      createdAt: DateTime.parse(map['createdAt'] ?? 
-                 DateTime.now().toIso8601String()),
+      name: map['name'] as String? ?? '',
+      age: map['age'] as int? ?? 0,
+      major: map['major'] as String? ?? '',
+      createdAt: _parseDateTime(map['createdAt']),
     );
+  }
+
+  /// Helper method to safely parse DateTime from dynamic value
+  /// This demonstrates proper error handling and type safety
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) {
+      return DateTime.now();
+    }
+    
+    // Handle different possible types
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        // If parsing fails, return current time
+        return DateTime.now();
+      }
+    }
+    
+    // If value is already DateTime, return it
+    if (value is DateTime) {
+      return value;
+    }
+    
+    // Fallback: return current time
+    return DateTime.now();
   }
 
   /// Create a copy of Student with updated fields

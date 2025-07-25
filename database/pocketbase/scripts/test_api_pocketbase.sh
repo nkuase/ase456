@@ -57,19 +57,4 @@ else
     echo "   💡 This is normal if you haven't run create_users.sh yet"
 fi
 
-echo ""
-echo "================================="
-echo "🎯 Next Steps for Students:"
-echo "================================="
-echo "1. If all tests pass, run your Dart script:"
-echo "   dart run /Users/chos5/github/nkuase/ase456/database/pocketbase/lib/main.dart"
-echo ""
-echo "2. If tests fail, run the setup script first:"
-echo "   ./create_users.sh"
-echo ""
-echo "3. Monitor the PocketBase logs:"
-echo "   tail -f ~/pocketbase/pocketbase.log"
-echo ""
-echo "4. Access the admin panel to see collections:"
-echo "   $POCKETBASE_URL/_/"
-echo "================================="
+

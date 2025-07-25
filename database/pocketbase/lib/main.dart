@@ -4,14 +4,15 @@ import 'models/student.dart';
 import 'services/pocketbase_student_service.dart';
 
 /// Main entry point for PocketBase Student Example
-/// 
+///
 /// This example demonstrates:
 /// 1. PocketBase initialization
 /// 2. CRUD operations with PocketBase
 /// 3. Real-time data streaming (simulated)
 /// 4. Query operations
 /// 5. Advanced PocketBase features
-/// 
+/// 6. Database abstraction with top-level functions
+///
 /// Note: Before running this example, you need to:
 /// 1. Install and run PocketBase server
 /// 2. Start the server with: ./pocketbase serve
@@ -20,16 +21,15 @@ import 'services/pocketbase_student_service.dart';
 void main() async {
   print('📦 PocketBase Student Management Example');
   print('========================================\n');
-  
+
   try {
     // Initialize PocketBase
     print('🚀 Initializing PocketBase...');
     await PocketBaseStudentService.initialize();
     print('✅ PocketBase initialized successfully\n');
-    
+
     // Demo menu
     await showMenu();
-    
   } catch (e) {
     print('❌ PocketBase initialization failed: $e');
     print('\n📝 To fix this:');
@@ -38,7 +38,7 @@ void main() async {
     print('3. Run: ./pocketbase serve');
     print('4. Access admin panel at http://127.0.0.1:8090/_/');
     print('5. Set up collections and auth if needed');
-    
+
     // Run offline examples instead
     print('\n🔄 Running offline examples with mock data...');
     await runOfflineExamples();
@@ -58,21 +58,30 @@ Future<void> showMenu() async {
   print('8. Run All Examples');
   print('9. Clean Database');
   print('0. Exit');
-  
+
   // For demo purposes, run all examples
   print('\n🎯 Running all examples...\n');
   await PocketBaseExamples.runAllExamples();
-  
-  // Also run database abstraction demo
+
+  // Demonstrate database abstraction with top-level functions
   print('\n🔀 Running Database Abstraction Demo...\n');
-  await DatabaseAbstractionDemo.switchingDatabases();
+  await demonstrateDatabaseSwitching();
+
+  // Additional demos to show the power of abstraction
+  print('\n💼 Running Business Logic Demo...\n');
+  try {
+    var mockDb = createMockDatabase();
+    await demonstrateBusinessLogic(mockDb);
+  } catch (e) {
+    print('⚠️ Business logic demo failed: $e');
+  }
 }
 
 /// Run examples with mock data when PocketBase is not available
 Future<void> runOfflineExamples() async {
   print('\n📚 Mock Student Examples (Offline Mode)');
   print('======================================\n');
-  
+
   // Create mock students
   List<Student> mockStudents = [
     Student(
@@ -83,7 +92,7 @@ Future<void> runOfflineExamples() async {
       createdAt: DateTime.now(),
     ),
     Student(
-      id: '2', 
+      id: '2',
       name: 'Bob Smith',
       age: 22,
       major: 'Mathematics',
@@ -97,24 +106,24 @@ Future<void> runOfflineExamples() async {
       createdAt: DateTime.now(),
     ),
   ];
-  
+
   print('📖 Mock Students:');
   for (Student student in mockStudents) {
     print('  $student');
   }
-  
+
   print('\n🔄 Demonstrating model methods:');
-  
+
   // Demonstrate toMap
   print('\n📄 Student as Map:');
   print('  ${mockStudents.first.toMap()}');
-  
+
   // Demonstrate copyWith
   print('\n✏️ Copying student with new age:');
   Student updatedAlice = mockStudents.first.copyWith(age: 21);
   print('  Original: ${mockStudents.first}');
   print('  Updated:  $updatedAlice');
-  
+
   // Demonstrate filtering (simulating queries)
   print('\n🔍 Students in Computer Science:');
   List<Student> csStudents = mockStudents
@@ -123,15 +132,26 @@ Future<void> runOfflineExamples() async {
   for (Student student in csStudents) {
     print('  $student');
   }
-  
+
   print('\n📊 Students aged 20 or older:');
-  List<Student> adults = mockStudents
-      .where((student) => student.age >= 20)
-      .toList();
+  List<Student> adults =
+      mockStudents.where((student) => student.age >= 20).toList();
   for (Student student in adults) {
     print('  $student');
   }
-  
+
+  // Demonstrate database abstraction in offline mode
+  print('\n⚙️ Running offline database abstraction demo...');
+  try {
+    var mockDb = createMockDatabase();
+    await runDatabaseDemo(mockDb, 'Mock (Offline)');
+
+    print('\n💼 Demonstrating database-agnostic business logic...');
+    await demonstrateBusinessLogic(mockDb);
+  } catch (e) {
+    print('❌ Offline database demo failed: $e');
+  }
+
   print('\n✅ Offline examples completed!');
   print('\n💡 To enable PocketBase features:');
   print('   1. Download PocketBase from https://pocketbase.io/');
@@ -162,7 +182,7 @@ Future<void> demonstrateOperation(String operation) async {
 Future<void> _demonstrateCreate() async {
   print('\n📝 CREATE Operation Demo');
   print('========================');
-  
+
   Student newStudent = Student(
     id: '',
     name: 'Demo Student',
@@ -170,7 +190,7 @@ Future<void> _demonstrateCreate() async {
     major: 'Demo Major',
     createdAt: DateTime.now(),
   );
-  
+
   try {
     String id = await PocketBaseStudentService.createStudent(newStudent);
     print('✅ Created student with ID: $id');
@@ -182,7 +202,7 @@ Future<void> _demonstrateCreate() async {
 Future<void> _demonstrateRead() async {
   print('\n📖 READ Operation Demo');
   print('======================');
-  
+
   try {
     List<Student> students = await PocketBaseStudentService.getAllStudents();
     print('✅ Retrieved ${students.length} students');
@@ -197,7 +217,7 @@ Future<void> _demonstrateRead() async {
 Future<void> _demonstrateUpdate() async {
   print('\n✏️ UPDATE Operation Demo');
   print('========================');
-  
+
   try {
     List<Student> students = await PocketBaseStudentService.getAllStudents();
     if (students.isNotEmpty) {
@@ -215,7 +235,7 @@ Future<void> _demonstrateUpdate() async {
 Future<void> _demonstrateDelete() async {
   print('\n🗑️ DELETE Operation Demo');
   print('========================');
-  
+
   try {
     List<Student> students = await PocketBaseStudentService.getAllStudents();
     if (students.isNotEmpty) {
