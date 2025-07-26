@@ -1,15 +1,48 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Dart IndexedDB (package:web)</title>
+  <meta charset="UTF-8" />
+  <title>Dart IndexedDB Interactive</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 1rem;
+    }
+    input, button {
+      margin: 0.3rem 0.5rem 0.3rem 0;
+    }
+    #output {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
-  <h1>Dart + package:web + IndexedDB</h1>
-  <button id="create">Create Record</button>
-  <button id="readAll">Read All Records</button>
-  <pre id="output" style="background:#eee; padding:1em; border-radius:5px;"></pre>
+  <h1>Dart + IndexedDB + package:web Interactive Demo</h1>
+  
+  <label for="key">Key:</label>
+  <input type="text" id="key" placeholder="Enter key (number)" />
+
+  <label for="foo">Foo:</label>
+  <input type="text" id="foo" placeholder="Enter foo" />
+
+  <label for="bar">Bar:</label>
+  <input type="number" id="bar" placeholder="Enter bar (number)" />
+
+  <div>
+    <button id="create">Create</button>
+    <button id="read">Read</button>
+    <button id="update">Update</button>
+    <button id="delete">Delete</button>
+  </div>
+
+  <div id="output" aria-live="polite" aria-atomic="true"></div>
+
   <script defer src="main.dart.js"></script>
 </body>
 </html>
