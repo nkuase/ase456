@@ -1,0 +1,13 @@
+name: my_indexeddb_project
+description: A simple Dart IndexedDB CRUD example
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  idb_shim: any
+
+dev_dependencies:
+  build_runner: ^2.4.0
+  build_web_compilers: ^4.0.4

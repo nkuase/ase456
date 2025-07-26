@@ -50,24 +50,29 @@ Future<void> deleteItem(Database db, int key) async {
   await store.delete(key);
   await txn.completed;
 }
+void showOutput(String message) {
+  final pre = document.createElement('pre');
+  pre.text = message;
+  document.body?.append(pre);
+}
 
-// Example usage
 void main() async {
   var db = await openDb();
 
   // CREATE
   int key = await addItem(db, {"foo": "Alice", "bar": 42});
-  print('Item added with key: $key');
+  showOutput('Item added with key: $key');
 
   // READ
   var items = await getAllItems(db);
-  print('All items: $items');
+  showOutput('All items: $items');
 
   // UPDATE
   await updateItem(db, key, {"foo": "Alice Updated", "bar": 99});
-  print('Item updated.');
+  showOutput('Item updated.');
 
   // DELETE
   await deleteItem(db, key);
-  print('Item deleted.');
+  showOutput('Item deleted.');
 }
+

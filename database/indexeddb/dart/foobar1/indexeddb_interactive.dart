@@ -1,94 +1,110 @@
 
-import 'dart:indexed_db';
-import 'dart:html';
+import 'dart:async';
+import 'dart:js_util';
+import 'dart:js_interop';
+import 'package:web/web.dart';
 
-const String dbName = "myDB";
-const String storeName = "myStore";
+const String dbName = 'StudentDatabase';
+const String storeName = 'dataStore';
 
-Future<Database> openDb() async {
-  return await window.indexedDB!.open(dbName, version: 1,
-      onUpgradeNeeded: (e) {
-    final db = (e.target as OpenDBRequest).result as Database;
-    if (!db.objectStoreNames!.contains(storeName)) {
-      db.createObjectStore(storeName, autoIncrement: true);
+Future<IDBDatabase> openDb() {
+  final completer = Completer<IDBDatabase>();
+  final request = window.indexedDB!.open(dbName, 1);
+
+  request.onsuccess = allowInterop((_) {
+    final db = request.result;
+    if (db != null) {
+      completer.complete(db);
+    } else {
+      completer.completeError('IndexedDB returned null result');
     }
   });
+
+  request.onerror = allowInterop((_) {
+    completer.completeError(request.error ?? 'Unknown error');
+  });
+
+  request.onupgradeneeded = allowInterop((_) {
+    final db = request.result;
+    if (db != null && !db.objectStoreNames.contains(storeName)) {
+      db.createObjectStore(
+        storeName,
+        IDBObjectStoreParameters(keyPath: 'id', autoIncrement: true),
+      );
+    }
+  });
+
+  return completer.future;
 }
 
 Future<int> create(Map<String, dynamic> data) async {
   final db = await openDb();
-  final tx = db.transaction(storeName, 'readwrite');
+  final tx = db.transaction(storeName, IDBTransactionMode.readwrite);
   final store = tx.objectStore(storeName);
-  final key = await store.add(data);
-  await tx.completed;
-  return key as int;
+  final request = store.add(jsify(data));
+
+  final completer = Completer<int>();
+  request.onsuccess = allowInterop((_) {
+    final result = request.result;
+    if (result != null) {
+      completer.complete(result as int);
+    } else {
+      completer.completeError('Create returned null');
+    }
+  });
+  request.onerror = allowInterop((_) {
+    completer.completeError(request.error ?? 'Create error');
+  });
+
+  return completer.future;
 }
 
-Future<Map<String, dynamic>?> read(int key) async {
+Future<List<Object?>> readAll() async {
   final db = await openDb();
-  final tx = db.transaction(storeName, 'readonly');
+  final tx = db.transaction(storeName, IDBTransactionMode.readonly);
   final store = tx.objectStore(storeName);
-  final result = await store.getObject(key);
-  await tx.completed;
-  return result != null ? Map<String, dynamic>.from(result as Map) : null;
-}
+  final request = store.getAll();
 
-Future<void> update(int key, Map<String, dynamic> data) async {
-  final db = await openDb();
-  final tx = db.transaction(storeName, 'readwrite');
-  final store = tx.objectStore(storeName);
-  await store.put(data, key);
-  await tx.completed;
-}
+  final completer = Completer<List<Object?>>();
+  request.onsuccess = allowInterop((_) {
+    final result = request.result;
+    if (result != null) {
+      completer.complete(result);
+    } else {
+      completer.completeError('ReadAll returned null');
+    }
+  });
+  request.onerror = allowInterop((_) {
+    completer.completeError(request.error ?? 'ReadAll error');
+  });
 
-Future<void> deleteRecord(int key) async {
-  final db = await openDb();
-  final tx = db.transaction(storeName, 'readwrite');
-  final store = tx.objectStore(storeName);
-  await store.delete(key);
-  await tx.completed;
-}
-
-void showOutput(String msg) {
-  final div = querySelector('#output')!;
-  div.appendHtml('<p>${msg}</p>');
+  return completer.future;
 }
 
 void main() {
-  final createBtn = querySelector('#create')!;
-  final readBtn = querySelector('#read')!;
-  final updateBtn = querySelector('#update')!;
-  final deleteBtn = querySelector('#delete')!;
-  final inputKey = querySelector('#key') as InputElement;
-  final inputFoo = querySelector('#foo') as InputElement;
-  final inputBar = querySelector('#bar') as InputElement;
+  final createBtn = document.getElementById('create') as HTMLButtonElement;
+  final readBtn = document.getElementById('readAll') as HTMLButtonElement;
+  final output = document.getElementById('output') as HTMLPreElement;
 
-  createBtn.onClick.listen((_) async {
-    final data = {'foo': inputFoo.value ?? '', 'bar': int.tryParse(inputBar.value ?? '') ?? 0};
-    final key = await create(data);
-    inputKey.value = key.toString();
-    showOutput('Created with key $key: $data');
-  });
+  createBtn.addEventListener('click', allowInterop((_) async {
+    final record = {
+      'foo': 'bar',
+      'bar': DateTime.now().millisecondsSinceEpoch,
+    };
+    try {
+      final id = await create(record);
+      output.textContent = 'Created ID: \$id';
+    } catch (e) {
+      output.textContent = 'Create error: \$e';
+    }
+  }));
 
-  readBtn.onClick.listen((_) async {
-    final key = int.tryParse(inputKey.value ?? '');
-    if (key == null) return showOutput('Invalid key');
-    final result = await read(key);
-    showOutput('Read from key $key: $result');
-  });
-
-  updateBtn.onClick.listen((_) async {
-    final key = int.tryParse(inputKey.value ?? '');
-    if (key == null) return showOutput('Invalid key');
-    final data = {'foo': inputFoo.value ?? '', 'bar': int.tryParse(inputBar.value ?? '') ?? 0};
-    await update(key, data);
-    showOutput('Updated key $key with $data');
-  });
-
-  deleteBtn.onClick.listen((_) async {
-    final key = int.tryParse(inputKey.value ?? '');
-    if (key == null) return showOutput('Invalid key');
-    await deleteRecord(key);
-    showOutput('Deleted key $key');
-  });
+  readBtn.addEventListener('click', allowInterop((_) async {
+    try {
+      final records = await readAll();
+      output.textContent = 'Records:\n' + records.map((e) => e.toString()).join('\n');
+    } catch (e) {
+      output.textContent = 'Read error: \$e';
+    }
+  }));
 }
