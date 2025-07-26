@@ -1,5 +1,7 @@
 #!/bin/bash
 
+dart pub get
+
 # Quick Compilation Test
 echo "🔧 Testing Dart compilation..."
 

@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IndexedDB Browser Demo</title>
     <style>
-        body { padding: 20px; font-family: Arial, sans-serif; }
-        button { margin: 5px; padding: 10px; }
-        #output { 
-            margin-top: 20px; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
             min-height: 200px;
         }
     </style>
 </head>
+
 <body>
     <h1>IndexedDB Browser Demo</h1>
     <div>
         <button onclick="addRecord()">Add Random Record</button>
         <button onclick="getAllRecords()">Show All Records</button>
         <button onclick="clearAllRecords()">Clear All Records</button>
+        <button onclick="updateLastRecord()">Update Last Record</button>
     </div>
     <div id="output"></div>
 
@@ -81,6 +92,35 @@
             };
         }
 
+        // Add this function below the others in your <script> tag
+        function updateLastRecord() {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+
+            // Open a cursor in reverse order to get the last (highest id) record
+            const request = store.openCursor(null, 'prev');
+
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const record = cursor.value;
+
+                    // Modify the record
+                    record.foo = `P-${record.foo}`;
+                    record.bar += 1;
+
+                    // Update the record
+                    const updateRequest = cursor.update(record);
+
+                    updateRequest.onsuccess = () => {
+                        showOutput({ message: 'Record updated', updated: record });
+                    };
+                } else {
+                    showOutput({ message: 'No records to update' });
+                }
+            };
+        }
+
         // Clear all records
         function clearAllRecords() {
             const transaction = db.transaction([storeName], 'readwrite');
@@ -93,4 +133,5 @@
         }
     </script>
 </body>
-</html> 
+
+</html>
