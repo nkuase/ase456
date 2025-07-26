@@ -1,0 +1,24 @@
+name: foobar_indexeddb
+description: FooBar application using IndexedDB for browser-based data storage
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  # For working with JavaScript interop
+  js: ^0.6.5
+  
+  # For working with HTML and DOM
+  web: ^0.4.0
+
+dev_dependencies:
+  # Testing framework
+  test: ^1.24.0
+  
+  # Build tools for web compilation
+  build_runner: ^2.4.0
+  build_web_compilers: ^4.0.0
+  
+  # Linter
+  lints: ^2.0.0

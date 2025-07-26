@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Hybrid Test: JS Functions for Dart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .output {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Hybrid Test: JavaScript Helper Functions</h1>
+    <p>This creates JavaScript helper functions that Dart can call reliably.</p>
+    
+    <div>
+        <button onclick="testHelperFunctions()">Test Helper Functions</button>
+    </div>
+    
+    <div id="output" class="output">Ready to test helper functions...\n</div>
+
+    <script>
+        // Global helper functions that Dart can call
+        window.indexedDBHelpers = {
+            // Safe JSON conversion that works reliably
+            jsObjectToJson: function(jsObject) {
+                try {
+                    return JSON.stringify(jsObject);
+                } catch (e) {
+                    console.error('JSON conversion failed:', e);
+                    return null;
+                }
+            },
+            
+            // Direct property extraction
+            extractProperties: function(jsObject) {
+                try {
+                    return {
+                        id: jsObject.id || null,
+                        foo: jsObject.foo || '',
+                        bar: typeof jsObject.bar === 'number' ? jsObject.bar : 0
+                    };
+                } catch (e) {
+                    console.error('Property extraction failed:', e);
+                    return { id: null, foo: '', bar: 0 };
+                }
+            },
+            
+            // Test object for verification
+            createTestObject: function() {
+                return { id: 'test_123', foo: 'Test Data', bar: 42 };
+            }
+        };
+        
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        function testHelperFunctions() {
+            log('🧪 Testing JavaScript helper functions...');
+            
+            // Create test object
+            const testObj = window.indexedDBHelpers.createTestObject();
+            log(`📄 Test object: ${JSON.stringify(testObj)}`);
+            
+            // Test JSON conversion
+            const jsonResult = window.indexedDBHelpers.jsObjectToJson(testObj);
+            log(`🔄 JSON conversion: ${jsonResult}`);
+            
+            // Test property extraction
+            const extracted = window.indexedDBHelpers.extractProperties(testObj);
+            log(`🎯 Property extraction: ${JSON.stringify(extracted)}`);
+            
+            log('✅ Helper functions are ready for Dart to use!');
+        }
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            log('🌐 JavaScript helper functions loaded');
+            log('🎯 These functions can be called reliably from compiled Dart code');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndexedDB Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .output {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .error { background-color: #ffe6e6; }
+        .success { background-color: #e6ffe6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 IndexedDB Debug Test</h1>
+    <p>This page tests IndexedDB operations with detailed logging to help debug issues.</p>
+    
+    <div>
+        <button onclick="initDB()">1. Initialize Database</button>
+        <button onclick="addTestData()">2. Add Test Data</button>
+        <button onclick="listRawData()">3. List Raw Data</button>
+        <button onclick="testConversion()">4. Test Storage/Retrieval Cycle</button>
+        <button onclick="clearDB()">5. Clear Database</button>
+    </div>
+    
+    <div id="output" class="output">Ready to test...\n</div>
+
+    <script>
+        let db = null;
+        const DB_NAME = 'FooBarDB';
+        const STORE_NAME = 'foobar';
+        
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        async function initDB() {
+            try {
+                log('🔧 Initializing IndexedDB...');
+                
+                const request = indexedDB.open(DB_NAME, 1);
+                
+                request.onerror = (event) => {
+                    log(`❌ Database error: ${event.target.error}`);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    log('📦 Creating database schema...');
+                    const database = event.target.result;
+                    
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const store = database.createObjectStore(STORE_NAME, {
+                            keyPath: 'id',
+                            autoIncrement: false
+                        });
+                        
+                        store.createIndex('foo_index', 'foo', { unique: false });
+                        store.createIndex('bar_index', 'bar', { unique: false });
+                        
+                        log('✅ Object store created successfully');
+                    }
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    log('✅ Database initialized successfully');
+                    log(`📊 Database name: ${db.name}, version: ${db.version}`);
+                    log(`📁 Object stores: ${Array.from(db.objectStoreNames).join(', ')}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to initialize database: ${error}`);
+            }
+        }
+        
+        async function addTestData() {
+            if (!db) {
+                log('❌ Database not initialized');
+                return;
+            }
+            
+            try {
+                log('📝 Adding test data...');
+                
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const testData = [
+                    { id: 'test1', foo: 'Hello World', bar: 42 },
+                    { id: 'test2', foo: 'Dart Programming', bar: 100 },
+                    { id: 'test3', foo: 'IndexedDB Test', bar: 75 }
+                ];
+                
+                for (const data of testData) {
+                    log(`  Adding: ${JSON.stringify(data)}`);
+                    const request = store.put(data);
+                    
+                    request.onsuccess = () => {
+                        log(`  ✅ Added: ${data.id}`);
+                    };
+                    
+                    request.onerror = (event) => {
+                        log(`  ❌ Failed to add ${data.id}: ${event.target.error}`);
+                    };
+                }
+                
+                transaction.oncomplete = () => {
+                    log('✅ All test data added successfully');
+                };
+                
+                transaction.onerror = (event) => {
+                    log(`❌ Transaction failed: ${event.target.error}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to add test data: ${error}`);
+            }
+        }
+        
+        async function listRawData() {
+            if (!db) {
+                log('❌ Database not initialized');
+                return;
+            }
+            
+            try {
+                log('📋 Listing raw data from IndexedDB...');
+                
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.openCursor();
+                
+                let count = 0;
+                
+                request.onsuccess = (event) => {
+                    const cursor = event.target.result;
+                    
+                    if (cursor) {
+                        count++;
+                        const value = cursor.value;
+                        
+                        log(`📄 Record ${count}:`);
+                        log(`  Key: ${cursor.key}`);
+                        log(`  Value: ${JSON.stringify(value, null, 2)}`);
+                        log(`  Value type: ${typeof value}`);
+                        log(`  Constructor: ${value.constructor.name}`);
+                        
+                        // Test property access
+                        log(`  Direct access - id: ${value.id}, foo: ${value.foo}, bar: ${value.bar}`);
+                        
+                        cursor.continue();
+                    } else {
+                        log(`✅ Finished listing ${count} records`);
+                    }
+                };
+                
+                request.onerror = (event) => {
+                    log(`❌ Failed to list data: ${event.target.error}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to list raw data: ${error}`);
+            }
+        }
+        
+        async function testConversion() {
+            if (!db) {
+                log('❌ Database not initialized');
+                return;
+            }
+            
+            try {
+                log('🔄 Testing complete storage and retrieval cycle...');
+                
+                // Step 1: Store a test record directly
+                const testRecord = { id: 'test_123', foo: 'Test Data', bar: 999 };
+                log(`📝 Storing test record: ${JSON.stringify(testRecord)}`);
+                
+                const transaction1 = db.transaction([STORE_NAME], 'readwrite');
+                const store1 = transaction1.objectStore(STORE_NAME);
+                
+                const putRequest = store1.put(testRecord);
+                
+                putRequest.onsuccess = () => {
+                    log('✅ Test record stored successfully');
+                    
+                    // Step 2: Retrieve the same record
+                    log('📖 Retrieving test record...');
+                    const transaction2 = db.transaction([STORE_NAME], 'readonly');
+                    const store2 = transaction2.objectStore(STORE_NAME);
+                    const getRequest = store2.get('test_123');
+                    
+                    getRequest.onsuccess = (event) => {
+                        const retrieved = event.target.result;
+                        log(`📄 Retrieved: ${JSON.stringify(retrieved)}`);
+                        log(`📊 Type: ${typeof retrieved}, Constructor: ${retrieved.constructor.name}`);
+                        
+                        // Step 3: Test different conversion methods
+                        log('🧪 Testing conversions:');
+                        
+                        try {
+                            const jsonString = JSON.stringify(retrieved);
+                            const parsed = JSON.parse(jsonString);
+                            log(`  JSON method: ${JSON.stringify(parsed)} ✅`);
+                        } catch (e) {
+                            log(`  JSON method failed: ${e} ❌`);
+                        }
+                        
+                        try {
+                            const manual = {
+                                id: retrieved.id,
+                                foo: retrieved.foo,
+                                bar: retrieved.bar
+                            };
+                            log(`  Direct access: ${JSON.stringify(manual)} ✅`);
+                        } catch (e) {
+                            log(`  Direct access failed: ${e} ❌`);
+                        }
+                        
+                        try {
+                            const keys = Object.keys(retrieved);
+                            log(`  Object keys: [${keys.join(', ')}]`);
+                            const keyMap = {};
+                            keys.forEach(key => {
+                                keyMap[key] = retrieved[key];
+                            });
+                            log(`  Key iteration: ${JSON.stringify(keyMap)} ✅`);
+                        } catch (e) {
+                            log(`  Key iteration failed: ${e} ❌`);
+                        }
+                    };
+                    
+                    getRequest.onerror = (event) => {
+                        log(`❌ Failed to retrieve test record: ${event.target.error}`);
+                    };
+                };
+                
+                putRequest.onerror = (event) => {
+                    log(`❌ Failed to store test record: ${event.target.error}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to test conversion: ${error}`);
+            }
+        }
+        
+        async function clearDB() {
+            if (!db) {
+                log('❌ Database not initialized');
+                return;
+            }
+            
+            try {
+                log('🗑️ Clearing database...');
+                
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.clear();
+                
+                request.onsuccess = () => {
+                    log('✅ Database cleared successfully');
+                };
+                
+                request.onerror = (event) => {
+                    log(`❌ Failed to clear database: ${event.target.error}`);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to clear database: ${error}`);
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            log('🌐 Page loaded - IndexedDB debug test ready');
+            log('🔧 Click "Initialize Database" to start');
+        });
+    </script>
+</body>
+</html>

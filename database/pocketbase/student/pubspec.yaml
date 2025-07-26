@@ -1,0 +1,19 @@
+# Test Dependencies for FooBar Project
+
+name: foobar_test
+description: Unit tests for FooBar CRUD and Utility classes
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  # PocketBase client
+  pocketbase: ^0.23.0
+
+dev_dependencies:
+  # Testing framework
+  test: ^1.24.0
+
+# Note: In a real project, you would add these to your existing pubspec.yaml
+# This file is just for reference

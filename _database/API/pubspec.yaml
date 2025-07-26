@@ -1,35 +1,50 @@
-name: universal_crud_api
-description: A universal CRUD API that works with multiple database backends
-version: 1.0.0
+name: simple_database_api
+description: A beginner-friendly database API for college freshmen learning programming
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  # HTTP server for API
-  shelf: ^1.4.1
-  shelf_router: ^1.1.4
-  shelf_cors_headers: ^0.1.5
-  
-  # JSON handling
-  json_annotation: ^4.8.1
-  
-  # HTTP client
-  http: ^1.1.0
-  
-  # Database implementations
-  sqlite3: ^2.4.0
-  path: ^1.8.3
-  
-  # Firebase (optional - for Firebase implementation)
-  # cloud_firestore: ^4.8.0
-  # firebase_core: ^2.15.0
-  
-  # Utilities
-  uuid: ^4.2.1
-  
-dev_dependencies:
-  test: ^1.24.0
-  json_serializable: ^6.7.1
-  build_runner: ^2.4.7
+  # No external dependencies needed!
+  # This API is designed to be simple and self-contained
+  # Perfect for beginners who want to focus on learning concepts
 
+dev_dependencies:
+  # Development and testing tools
+  test: ^1.21.0
+  lints: ^2.0.0
+
+# This package works on all platforms
+platforms:
+  linux:
+  macos:
+  windows:
+  android:
+  ios:
+  web:
+
+# Project metadata
+homepage: https://github.com/your-university/ase456
+repository: https://github.com/your-university/ase456/tree/main/database/api
+documentation: https://github.com/your-university/ase456/blob/main/database/api/README.md
+
+# Educational project information
+topics:
+  - education
+  - database
+  - api
+  - beginners
+  - dart
+  - programming-concepts
+
+# This is an educational project designed for:
+# - College freshmen learning programming
+# - Understanding database concepts
+# - Learning API design patterns
+# - Practicing software engineering principles
+
+# How to use:
+# 1. dart run demo.dart      (see examples)
+# 2. dart run tutorial.dart  (step-by-step learning)
+# 3. dart run exercises.dart (practice problems)

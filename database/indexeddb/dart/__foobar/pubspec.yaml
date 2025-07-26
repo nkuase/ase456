@@ -1,0 +1,31 @@
+# FooBar IndexedDB Project
+# Demonstrates using IndexedDB with Dart for client-side data storage
+
+name: foobar_indexeddb
+description: FooBar CRUD operations using IndexedDB in Dart
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  # No external database dependencies needed for IndexedDB
+  # IndexedDB is built into the browser
+
+dev_dependencies:
+  # Testing framework
+  test: ^1.24.0
+  # Build runner for web compilation
+  build_runner: ^2.4.0
+  build_web_compilers: ^4.0.0
+
+# Build configuration for web
+targets:
+  $default:
+    builders:
+      build_web_compilers:
+        options:
+          compiler: dart2js
+          
+# Note: IndexedDB only works in web browsers
+# Compile to JavaScript using: dart compile js lib/main.dart -o web/main.dart.js
