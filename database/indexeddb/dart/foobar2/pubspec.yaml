@@ -7,6 +7,7 @@ environment:
 
 dependencies:
   idb_shim: any
+  web: ^1.1.1
 
 dev_dependencies:
   build_runner: ^2.4.15

@@ -1,6 +1,6 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/idb_browser.dart';
-import 'package:web/web.dart' hide Request, Event;
+import 'package:web/web.dart';
 import 'dart:js_interop';
 
 const String dbName = "myDB";
@@ -10,7 +10,7 @@ Future<idb.Database> openDb() async {
   final idbFactory = idbFactoryBrowser;
   return await idbFactory.open(dbName, version: 1,
       onUpgradeNeeded: (idb.VersionChangeEvent e) {
-    final db = (e.target as idb.Request).result as idb.Database;
+    final db = (e.target as idb.Request).result;
     if (!db.objectStoreNames.contains(storeName)) {
       db.createObjectStore(storeName, autoIncrement: true);
     }
@@ -33,7 +33,7 @@ Future<Map<String, dynamic>?> read(int key) async {
   final result = await store.getObject(key);
   await txn.completed;
   if (result != null && result is Map) {
-    return Map<String, dynamic>.from(result as Map);
+    return Map<String, dynamic>.from(result);
   }
   return null;
 }
@@ -55,7 +55,7 @@ Future<void> deleteRecord(int key) async {
 }
 
 void showOutput(String msg) {
-  final outputDiv = document.querySelector('#output') as HTMLDivElement?;
+  final outputDiv = document.querySelector('#output');
   if (outputDiv != null) {
     final p = HTMLParagraphElement();
     p.textContent = msg;
@@ -68,6 +68,7 @@ void main() {
   final readBtn = document.querySelector('#read') as HTMLButtonElement?;
   final updateBtn = document.querySelector('#update') as HTMLButtonElement?;
   final deleteBtn = document.querySelector('#delete') as HTMLButtonElement?;
+
   final inputKey = document.querySelector('#key') as HTMLInputElement?;
   final inputFoo = document.querySelector('#foo') as HTMLInputElement?;
   final inputBar = document.querySelector('#bar') as HTMLInputElement?;
@@ -79,18 +80,18 @@ void main() {
     if (inputFoo == null || inputBar == null || inputKey == null) return;
 
     final data = {
-      'foo': inputFoo!.value ?? '',
-      'bar': int.tryParse(inputBar!.value ?? '') ?? 0,
+      'foo': inputFoo.value,
+      'bar': int.tryParse(inputBar.value) ?? 0,
     };
     final key = await create(data);
-    inputKey!.value = key.toString();
+    inputKey.value = key.toString();
     showOutput('Created with key $key: $data');
   }
 
   void handleRead() async {
     if (inputKey == null) return;
 
-    final key = parseKey(inputKey!.value);
+    final key = parseKey(inputKey.value);
     if (key == null) {
       showOutput('Invalid key');
       return;
@@ -102,15 +103,15 @@ void main() {
   void handleUpdate() async {
     if (inputKey == null || inputFoo == null || inputBar == null) return;
 
-    final key = parseKey(inputKey!.value);
+    final key = parseKey(inputKey.value);
     if (key == null) {
       showOutput('Invalid key');
       return;
     }
 
     final data = {
-      'foo': inputFoo!.value ?? '',
-      'bar': int.tryParse(inputBar!.value ?? '') ?? 0,
+      'foo': inputFoo.value,
+      'bar': int.tryParse(inputBar.value) ?? 0,
     };
     await update(key, data);
     showOutput('Updated key $key with $data');
@@ -119,7 +120,7 @@ void main() {
   void handleDelete() async {
     if (inputKey == null) return;
 
-    final key = parseKey(inputKey!.value);
+    final key = parseKey(inputKey.value);
     if (key == null) {
       showOutput('Invalid key');
       return;

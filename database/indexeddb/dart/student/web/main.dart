@@ -1,8 +1,8 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:web/web.dart' hide Request, Event;
 import 'dart:js_interop';
-import '../lib/student.dart';
-import '../lib/student_crud.dart';
+import 'student.dart';
+import 'student_crud.dart';
 
 // Global database instance
 late idb.Database database;

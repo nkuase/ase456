@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+#dart pub deps
 dart pub get
 # dart pub outdated
 # dart pub upgrade --major-versions
