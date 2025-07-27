@@ -1,0 +1,20 @@
+# Analysis configuration for Dart web projects
+# This file helps ensure code quality and consistency
+
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - build/**
+  language:
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    # Additional rules for better code quality
+    prefer_single_quotes: true
+    avoid_print: false  # Allow print statements for debugging
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    use_super_parameters: true

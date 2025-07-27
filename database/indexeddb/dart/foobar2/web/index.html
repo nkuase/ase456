@@ -1,11 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Dart IndexedDB Example</title>
+    <title>FooBar ver1</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 1rem;
+      }
+      input,
+      button {
+        margin: 0.3rem 0.5rem 0.3rem 0;
+      }
+      #output {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        white-space: pre-wrap;
+        max-height: 250px;
+        overflow-y: auto;
+      }
+    </style>
   </head>
   <body>
-    <h2>Check the browser console for output.</h2>
+    <h1>FooBar2</h1>
+    <h2>Simple CRUD, multiple dart source, and webdev build</h2>
+
+    <p>Build: dart pub global run webdev build</p>
+    <p>Run: dart pub global run webdev serve</p>
+    <hr style="border: none; border-top: 1px solid black; margin: 16px 0;">
+
+    <label for="key">Key:</label>
+    <input type="text" id="key" placeholder="Enter key (number)" />
+
+    <label for="foo">Foo:</label>
+    <input type="text" id="foo" placeholder="Enter foo" />
+
+    <label for="bar">Bar:</label>
+    <input type="number" id="bar" placeholder="Enter bar (number)" />
+
+    <div>
+      <button id="create">Create</button>
+      <button id="read">Read</button>
+      <button id="readall">Read All</button>      
+      <button id="update">Update</button>
+      <button id="delete">Delete</button>
+    </div>
+
+    <div id="output" aria-live="polite" aria-atomic="true"></div>
+
     <script defer src="main.dart.js"></script>
   </body>
 </html>
