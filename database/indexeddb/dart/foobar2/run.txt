@@ -1,5 +1,7 @@
 dart pub get
 
+rm -rf build
+
 # Activate webdev if not already
 dart pub global activate webdev
 

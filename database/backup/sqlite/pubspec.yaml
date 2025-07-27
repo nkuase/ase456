@@ -1,4 +1,4 @@
-name: foobar
+name: sqlite_example
 description: SQLite implementation of database service for desktop and mobile applications
 version: 1.0.0+1
 

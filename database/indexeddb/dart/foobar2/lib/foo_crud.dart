@@ -1,10 +1,8 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/idb_browser.dart';
-import 'package:web/web.dart';
-import 'dart:js_interop';
 
-const String dbName = "myDB";
-const String storeName = "myStore";
+const String dbName = 'myDB';
+const String storeName = 'myStore';
 
 Future<idb.Database> openDb() async {
   final idbFactory = idbFactoryBrowser;

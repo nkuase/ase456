@@ -1,5 +1,0 @@
-# webdev.yaml
-targets:
-  web:
-    outputs:
-      web: public/
