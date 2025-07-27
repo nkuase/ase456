@@ -13,4 +13,7 @@ dart pub global run webdev build
 # Serve (for development, starts a localhost server)
 dart pub global run webdev serve
 
-# pub run build_runner clean
+# Clean
+#dart run build_runner clean
+#rm -rf .dart_tool
+#dart pub get

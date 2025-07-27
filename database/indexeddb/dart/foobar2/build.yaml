@@ -1,0 +1,11 @@
+# Build configuration for Dart web application
+# Simple configuration that works with webdev
+
+targets:
+  $default:
+    builders:
+      build_web_compilers:entrypoint:
+        generate_for:
+          - web/**.dart
+        options:
+          compiler: dart2js

@@ -1,157 +1,173 @@
+import 'package:idb_shim/idb.dart' as idb;
+import 'package:idb_shim/idb_browser.dart';
+import 'package:web/web.dart' hide Request, Event;
+import 'student.dart';
+
+// Global variables
+const String dbName = 'StudentDatabase';
+const String storeName = 'students';
+
+/// Update status message on the web page
+void updateStatus(String message, String type) {
+  final statusElement = document.querySelector('#db-status') as HTMLElement?;
+  if (statusElement != null) {
+    statusElement.textContent = message;
+    statusElement.className = 'status $type';
+  }
+  print('Status: $message');
+}
 
 /// Initialize IndexedDB database and object store
-Future<void> initializeDatabase() async {
+Future<idb.Database> initializeDatabase() async {
   try {
     updateStatus('🔧 Initializing database...', 'info');
+    print('🔧 Starting database initialization...');
 
-    final factory = idb.IdbFactory();
+    final idbFactory = idbFactoryBrowser;
+    print('✅ Got IDB factory');
 
-    // Delete existing database for clean start (useful for development)
-    factory.deleteDatabase(dbName);
-    log('🗑️ Cleaned up existing database');
+    // Delete existing database for clean start
+    await idbFactory.deleteDatabase(dbName);
+    print('🗑️ Cleaned up existing database');
 
-    // Create database with object store
-    final result = await factory.openCreate(dbName, storeName);
-    database = result.database;
+    // Open database and create object store
+    final database = await idbFactory.open(dbName, version: 1,
+        onUpgradeNeeded: (idb.VersionChangeEvent e) {
+      final db = (e.target as idb.Request).result as idb.Database;
+      print('🏗️ Creating database schema...');
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, keyPath: 'id');
+        print('🏗️ Created object store: $storeName');
+      }
+    });
 
     updateStatus('✅ Database initialized successfully!', 'success');
-    log('🏗️ Created database: $dbName with store: $storeName');
+    print('🏗️ Database ready: $dbName with store: $storeName');
 
-    // Add some sample data for demonstration
-    await addSampleData();
-    
+    // Add sample data
+    await addSampleData(database);
+
+    return database;
   } catch (error) {
     updateStatus('❌ Failed to initialize database: $error', 'error');
-    log('💥 Database initialization failed: $error');
+    print('💥 Database initialization failed: $error');
     rethrow;
   }
 }
 
-/// Add sample student data for demonstration
-Future<void> addSampleData() async {
+/// Add sample student data
+Future<void> addSampleData(idb.Database database) async {
+  print('📊 Adding sample data...');
+
   final sampleStudents = [
     Student(
-      id: 'S001',
-      name: 'Alice Johnson',
-      age: 20,
-      major: 'Computer Science',
-    ),
-    Student(
-      id: 'S002', 
-      name: 'Bob Smith', 
-      age: 22, 
-      major: 'Mathematics'
-    ),
-    Student(
-      id: 'S003', 
-      name: 'Carol Davis', 
-      age: 21, 
-      major: 'Physics'
-    ),
+        id: 'S001', name: 'Alice Johnson', age: 20, major: 'Computer Science'),
+    Student(id: 'S002', name: 'Bob Smith', age: 22, major: 'Mathematics'),
+    Student(id: 'S003', name: 'Carol Davis', age: 21, major: 'Physics'),
+    Student(id: 'S004', name: 'David Wilson', age: 23, major: 'Engineering'),
+    Student(id: 'S005', name: 'Eva Martinez', age: 19, major: 'Biology'),
   ];
 
   for (final student in sampleStudents) {
-    await createStudent(student);
+    await createStudent(database, student);
   }
 
-  log('📊 Added ${sampleStudents.length} sample students');
+  print('📊 Successfully added ${sampleStudents.length} sample students');
 }
 
-
-
-/// CREATE: Add a new student to the database
-Future<void> createStudent(Student student) async {
+/// CREATE: Add a new student
+Future<void> createStudent(idb.Database database, Student student) async {
   try {
-    // Create a read-write transaction
-    final transaction = database.transactionList([storeName], 'readwrite');
-    final store = transaction.objectStore(storeName);
+    print('💾 Creating student: ${student.id} - ${student.name}');
 
-    // Convert Dart Map to JavaScript object for IndexedDB
-    final jsData = jsify(student.toMap());
-    
-    // Store the student data using student ID as key
-    store.put(jsData, student.id);
+    final txn = database.transaction(storeName, 'readwrite');
+    final store = txn.objectStore(storeName);
 
-    // Wait for transaction to complete
-    await transaction.completed;
+    await store.put(student.toMap(), student.id);
+    await txn.completed;
 
-    log('✅ CREATE: Added student ${student.id} - ${student.name}');
-    
+    print('✅ Student created: ${student.id}');
   } catch (error) {
-    log('❌ CREATE ERROR: Failed to add student: $error');
+    print('💥 Create error: $error');
     rethrow;
   }
 }
 
 /// READ: Get a specific student by ID
-Future<Student?> readStudent(String studentId) async {
+Future<Student?> readStudent(idb.Database database, String studentId) async {
   try {
-    // Create a read-only transaction
-    final transaction = database.transactionList([storeName], 'readonly');
-    final store = transaction.objectStore(storeName);
+    print('🔍 Reading student: $studentId');
 
-    // Get the student data
+    final txn = database.transaction(storeName, 'readonly');
+    final store = txn.objectStore(storeName);
     final result = await store.getObject(studentId);
+    await txn.completed;
 
-    if (result != null) {
-      // Convert JavaScript object back to Dart Map
-      final dartData = dartify(result);
-      final studentMap = Map<String, dynamic>.from(dartData as Map);
+    if (result != null && result is Map) {
+      final studentMap = Map<String, dynamic>.from(result as Map);
       final student = Student.fromMap(studentMap);
-      log('✅ READ: Found student ${student.id} - ${student.name}');
+      print('✅ Found student: ${student.toString()}');
       return student;
     } else {
-      log('⚠️ READ: Student with ID $studentId not found');
+      print('⚠️ Student not found: $studentId');
       return null;
     }
-    
   } catch (error) {
-    log('❌ READ ERROR: Failed to get student: $error');
+    print('💥 Read error: $error');
     return null;
   }
 }
 
-/// READ: Get all students from the database
-Future<List<Student>> readAllStudents() async {
-  try {
-    final transaction = database.transactionList([storeName], 'readonly');
-    final store = transaction.objectStore(storeName);
+/// READ: Get all students
+Future<List<Student>> readAllStudents(idb.Database database) async {
+  print('🔍 Starting readAllStudents()');
 
-    // Get all records using cursor
+  try {
+    final txn = database.transaction(storeName, 'readonly');
+    final store = txn.objectStore(storeName);
     final students = <Student>[];
 
-    await for (final cursorWithValue in store.openCursor(autoAdvance: true)) {
-      // Convert JavaScript object back to Dart Map
-      final dartData = dartify(cursorWithValue.value);
-      final studentData = Map<String, dynamic>.from(dartData as Map);
-      students.add(Student.fromMap(studentData));
+    print('📊 Opening cursor...');
+
+    // Get all records using cursor
+    await for (final cursor in store.openCursor()) {
+      print('📄 Found record: ${cursor.key}');
+      try {
+        final data = cursor.value;
+        print('📄 Raw data: $data');
+
+        if (data is Map) {
+          final studentMap = Map<String, dynamic>.from(data);
+          final student = Student.fromMap(studentMap);
+          students.add(student);
+          print('✅ Added student: ${student.name}');
+        }
+      } catch (parseError) {
+        print('💥 Parse error for record ${cursor.key}: $parseError');
+      }
     }
 
-    log('✅ READ ALL: Retrieved ${students.length} students');
+    await txn.completed;
+    print('📊 readAllStudents() returning ${students.length} students');
     return students;
-    
   } catch (error) {
-    log('❌ READ ALL ERROR: Failed to get all students: $error');
+    print('💥 readAllStudents() error: $error');
     return [];
   }
 }
 
-/// UPDATE: Modify an existing student's information
-Future<bool> updateStudent(
-  String studentId, {
-  String? name,
-  int? age,
-  String? major,
-}) async {
+/// UPDATE: Modify student information
+Future<bool> updateStudent(idb.Database database, String studentId,
+    {String? name, int? age, String? major}) async {
   try {
-    // First, check if student exists
-    final existingStudent = await readStudent(studentId);
+    print('🔄 Updating student: $studentId');
+
+    final existingStudent = await readStudent(database, studentId);
     if (existingStudent == null) {
-      log('⚠️ UPDATE: Student with ID $studentId not found');
+      print('⚠️ Student not found for update: $studentId');
       return false;
     }
 
-    // Create updated student with new values or keep existing ones
     final updatedStudent = Student(
       id: studentId,
       name: name ?? existingStudent.name,
@@ -159,63 +175,55 @@ Future<bool> updateStudent(
       major: major ?? existingStudent.major,
     );
 
-    // Update the record
-    final transaction = database.transactionList([storeName], 'readwrite');
-    final store = transaction.objectStore(storeName);
+    final txn = database.transaction(storeName, 'readwrite');
+    final store = txn.objectStore(storeName);
+    await store.put(updatedStudent.toMap(), studentId);
+    await txn.completed;
 
-    // Convert Dart Map to JavaScript object for IndexedDB
-    final jsData = jsify(updatedStudent.toMap());
-    
-    store.put(jsData, studentId);
-    await transaction.completed;
-
-    log('✅ UPDATE: Modified student ${updatedStudent.id} - ${updatedStudent.name}');
+    print('✅ Student updated: ${updatedStudent.toString()}');
     return true;
-    
   } catch (error) {
-    log('❌ UPDATE ERROR: Failed to update student: $error');
+    print('💥 Update error: $error');
     return false;
   }
 }
 
-/// DELETE: Remove a student from the database
-Future<bool> deleteStudent(String studentId) async {
+/// DELETE: Remove a student
+Future<bool> deleteStudent(idb.Database database, String studentId) async {
   try {
-    // Check if student exists first
-    final existingStudent = await readStudent(studentId);
+    print('🗑️ Deleting student: $studentId');
+
+    final existingStudent = await readStudent(database, studentId);
     if (existingStudent == null) {
-      log('⚠️ DELETE: Student with ID $studentId not found');
+      print('⚠️ Student not found for deletion: $studentId');
       return false;
     }
 
-    // Delete the record
-    final transaction = database.transactionList([storeName], 'readwrite');
-    final store = transaction.objectStore(storeName);
+    final txn = database.transaction(storeName, 'readwrite');
+    final store = txn.objectStore(storeName);
+    await store.delete(studentId);
+    await txn.completed;
 
-    store.delete(studentId);
-    await transaction.completed;
-
-    log('✅ DELETE: Removed student $studentId');
+    print('✅ Student deleted: $studentId');
     return true;
-    
   } catch (error) {
-    log('❌ DELETE ERROR: Failed to delete student: $error');
+    print('💥 Delete error: $error');
     return false;
   }
 }
 
-/// DELETE: Clear all students from the database
-Future<void> clearAllStudents() async {
+/// DELETE: Clear all students
+Future<void> clearAllStudents(idb.Database database) async {
   try {
-    final transaction = database.transactionList([storeName], 'readwrite');
-    final store = transaction.objectStore(storeName);
+    print('🗑️ Clearing all students...');
 
-    store.clear();
-    await transaction.completed;
+    final txn = database.transaction(storeName, 'readwrite');
+    final store = txn.objectStore(storeName);
+    await store.clear();
+    await txn.completed;
 
-    log('✅ CLEAR ALL: Removed all students from database');
-    
+    print('✅ All students cleared');
   } catch (error) {
-    log('❌ CLEAR ERROR: Failed to clear all students: $error');
+    print('💥 Clear all error: $error');
   }
 }
