@@ -1,0 +1,40 @@
+name: foobar_firebase
+description: Firebase implementation of database service for web, desktop and mobile applications
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  # Firebase Core - Required for all Firebase services
+  firebase_core: ^2.24.2
+  
+  # Cloud Firestore - NoSQL document database
+  cloud_firestore: ^4.13.6
+  
+  # Utility packages
+  uuid: ^3.0.7
+  intl: ^0.18.1
+
+dev_dependencies:
+  # Testing framework
+  test: ^1.21.0
+  
+  # Mocking for Firebase testing
+  fake_cloud_firestore: ^2.4.2
+  
+  # Linting
+  lints: ^2.0.0
+
+# Platform configuration
+platforms:
+  linux:
+  macos:
+  windows:
+  android:
+  ios:
+  web:
+
+# This package works on all platforms
+# Firebase provides cloud-based database services
+# For testing, we use fake_cloud_firestore to avoid real Firebase setup

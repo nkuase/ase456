@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Firestore Document</title>
+</head>
+<body>
+  <h1>Firebase: Add Document to foobar</h1>
+  <button id="addBtn">Add Document</button>
+  <p id="result"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoMJ3CgsibJSYAroSfJxlVhZNqMOCs2Sk",
+      authDomain: "foobar-ecfa8.firebaseapp.com",
+      projectId: "foobar-ecfa8",
+      storageBucket: "foobar-ecfa8.firebasestorage.app",
+      messagingSenderId: "40658006056",
+      appId: "1:40658006056:web:36ee62fa812738d8a3c51d",
+      measurementId: "G-RFS3VX4BNV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("addBtn").addEventListener("click", async () => {
+      const resultElem = document.getElementById("result");
+      try {
+        const docRef = await addDoc(collection(db, "foobar"), {
+          foo: "Hello",
+          bar: 23
+        });
+        resultElem.textContent = "✅ Document ID: " + docRef.id;
+      } catch (e) {
+        resultElem.textContent = "❌ Error: " + e.message;
+      }
+    });
+  </script>
+</body>
+</html>
