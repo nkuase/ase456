@@ -1,16 +1,18 @@
 #!/bin/bash
 
-# Firebase CRUD Operations - Run Script
-# Educational project for database programming course
+# Firebase FooBar CRUD Operations - Educational Run Script
+# Simple database programming course demonstration
 
-echo "🎓 Firebase CRUD Operations - Educational Demo"
-echo "=" 50
+echo "🎓 Firebase FooBar CRUD Demo - Educational Version"
+echo "=============================================="
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Function to print colored output
@@ -30,196 +32,339 @@ print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+print_info() {
+    echo -e "${CYAN}ℹ️  $1${NC}"
+}
+
+print_header() {
+    echo -e "${PURPLE}🔥 $1${NC}"
+}
+
+# Educational banner
+show_banner() {
+    echo ""
+    echo "=============================================="
+    echo "🎯 LEARNING OBJECTIVES:"
+    echo "   • Understand Firebase CRUD operations"
+    echo "   • Learn data modeling with Dart classes"
+    echo "   • Practice error handling patterns"
+    echo "   • Experience testing database applications"
+    echo "   • Explore project organization"
+    echo "=============================================="
+    echo ""
+}
+
+# Project structure overview
+show_structure() {
+    print_header "Project Structure Overview"
+    echo ""
+    echo "📁 foobar/"
+    echo "   ├── lib/"
+    echo "   │   ├── models/"
+    echo "   │   │   └── foobar.dart           # Simple data model (foo: String, bar: int)"
+    echo "   │   ├── services/"
+    echo "   │   │   └── foobar_crud_firebase.dart  # All CRUD operations"
+    echo "   │   ├── main.dart                 # Demo application"
+    echo "   │   └── firebase-config.json     # Firebase configuration"
+    echo "   ├── test/                         # Unit tests for learning"
+    echo "   ├── doc/                          # Marp presentation slides"
+    echo "   └── pubspec.yaml                  # Simple dependencies"
+    echo ""
+    print_info "This structure keeps code organized and easy to understand!"
+}
+
 # Check if Dart is installed
 check_dart() {
+    print_step "Checking Dart installation..."
     if ! command -v dart &> /dev/null; then
         print_error "Dart is not installed or not in PATH"
-        echo "Please install Dart: https://dart.dev/get-dart"
+        echo ""
+        echo "📥 How to install Dart:"
+        echo "   Option 1: Install Dart SDK directly"
+        echo "            https://dart.dev/get-dart"
+        echo ""
+        echo "   Option 2: Install Flutter (includes Dart)"
+        echo "            https://flutter.dev/docs/get-started/install"
+        echo ""
+        echo "   Option 3: Using package managers:"
+        echo "            brew install dart         # macOS"
+        echo "            choco install dart-sdk    # Windows"
+        echo "            sudo apt install dart     # Ubuntu"
+        echo ""
         exit 1
     fi
-    print_success "Dart is installed"
+    
+    DART_VERSION=$(dart --version 2>&1 | head -n1)
+    print_success "Dart is installed: $DART_VERSION"
 }
 
 # Install dependencies
 install_dependencies() {
-    print_step "Installing dependencies..."
+    print_step "Installing project dependencies..."
+    echo ""
+    echo "📦 Installing packages:"
+    echo "   • firedart: Firebase client for Dart console applications"
+    echo "   • test: Testing framework for unit tests"
+    echo ""
+    
     dart pub get
     if [ $? -eq 0 ]; then
         print_success "Dependencies installed successfully"
+        echo ""
+        echo "📋 What we installed:"
+        echo "   ✓ firedart ^0.9.8 - Firebase/Firestore client"
+        echo "   ✓ test ^1.21.0    - Testing framework"
     else
         print_error "Failed to install dependencies"
+        echo ""
+        echo "💡 Troubleshooting tips:"
+        echo "   1. Check your internet connection"
+        echo "   2. Verify pubspec.yaml syntax is correct"
+        echo "   3. Try: dart pub cache repair"
+        echo "   4. Check Dart version compatibility"
         exit 1
     fi
 }
 
-# Run tests
+# Run comprehensive tests
 run_tests() {
-    print_step "Running comprehensive tests..."
+    print_step "Running comprehensive unit tests..."
     echo ""
+    echo "🧪 Test Categories:"
+    echo "   • FooBar Model Tests      - Data validation and serialization"
+    echo "   • Service Structure Tests - CRUD method availability"
+    echo "   • Main Application Tests  - Random data generation"
+    echo ""
+    
     dart test --reporter=expanded
-    if [ $? -eq 0 ]; then
-        print_success "All tests passed!"
+    TEST_RESULT=$?
+    
+    echo ""
+    if [ $TEST_RESULT -eq 0 ]; then
+        print_success "All tests passed! 🎉"
+        echo ""
+        echo "📊 What the tests verified:"
+        echo "   ✓ FooBar class creates objects correctly"
+        echo "   ✓ Serialization to/from Map works properly"
+        echo "   ✓ Copy and equality methods function as expected"
+        echo "   ✓ Service class has all required CRUD methods"
+        echo "   ✓ Random data generation produces valid data"
+        echo "   ✓ Edge cases are handled appropriately"
     else
-        print_error "Some tests failed"
-        exit 1
+        print_warning "Some tests failed - this is normal for learning!"
+        echo ""
+        echo "📚 What to do when tests fail:"
+        echo "   1. Read the test output carefully"
+        echo "   2. Understand what the test was checking"
+        echo "   3. Look at the failing code"
+        echo "   4. Make corrections and run tests again"
+        echo "   5. Ask questions if you're stuck!"
     fi
 }
 
-# Run main demo
+# Run main demo application
 run_demo() {
-    print_step "Running Firebase CRUD demo..."
+    print_step "Running Firebase CRUD demonstration..."
     echo ""
+    echo "🚀 What the demo will show:"
+    echo "   1. Initialize Firebase connection"
+    echo "   2. CREATE: Add new FooBar documents"
+    echo "   3. READ: Retrieve documents (single and multiple)"
+    echo "   4. QUERY: Filter documents by criteria"
+    echo "   5. UPDATE: Modify existing documents"
+    echo "   6. DELETE: Remove documents"
+    echo "   7. Close connection properly"
+    echo ""
+    print_info "Note: This demo uses a test Firebase project"
+    echo ""
+    
     dart run lib/main.dart
-    if [ $? -eq 0 ]; then
-        print_success "Demo completed"
+    DEMO_RESULT=$?
+    
+    echo ""
+    if [ $DEMO_RESULT -eq 0 ]; then
+        print_success "Demo completed successfully!"
     else
-        print_warning "Demo completed with warnings (expected without real Firebase setup)"
+        print_warning "Demo completed with warnings (expected without real Firebase)"
+        echo ""
+        echo "💡 To run with real Firebase:"
+        echo "   1. Create your own Firebase project"
+        echo "   2. Update firebase-config.json with your config"
+        echo "   3. Set up Firestore database"
+        echo "   4. Run the demo again"
     fi
+}
+
+# View documentation
+view_docs() {
+    print_step "Opening documentation..."
+    echo ""
+    
+    if command -v npx &> /dev/null; then
+        print_info "Converting Marp slides to HTML..."
+        
+        # Convert main slides
+        npx @marp-team/marp-cli doc/firebase_crud_slides.md --html --output firebase_crud_slides.html
+        if [ $? -eq 0 ]; then
+            print_success "Main slides converted: firebase_crud_slides.html"
+        fi
+        
+        # Convert best practices slides  
+        npx @marp-team/marp-cli doc/firebase_best_practices.md --html --output firebase_best_practices.html
+        if [ $? -eq 0 ]; then
+            print_success "Best practices slides converted: firebase_best_practices.html"
+        fi
+        
+        # Try to open in browser
+        if command -v open &> /dev/null; then
+            open firebase_crud_slides.html
+        elif command -v xdg-open &> /dev/null; then
+            xdg-open firebase_crud_slides.html
+        else
+            print_info "Open firebase_crud_slides.html in your browser"
+        fi
+        
+    else
+        print_warning "Marp not available. Showing documentation locations:"
+        echo ""
+        echo "📚 Available documentation:"
+        echo "   • doc/firebase_crud_slides.md     - Main CRUD tutorial"
+        echo "   • doc/firebase_best_practices.md  - Advanced best practices"
+        echo ""
+        print_info "To view as slides, install Marp: npm install -g @marp-team/marp-cli"
+    fi
+}
+
+# Educational summary
+show_educational_summary() {
+    echo ""
+    print_header "Educational Summary"
+    echo ""
+    echo "🎓 What we learned today:"
+    echo ""
+    echo "📦 Data Modeling:"
+    echo "   • Simple Dart classes with required fields"
+    echo "   • Serialization to/from Map for Firebase"
+    echo "   • Nullable types for optional fields"
+    echo ""
+    echo "🔥 Firebase Operations:"
+    echo "   • CREATE: Adding new documents to collections"
+    echo "   • READ: Retrieving single documents and collections"  
+    echo "   • QUERY: Filtering documents with where clauses"
+    echo "   • UPDATE: Modifying existing documents"
+    echo "   • DELETE: Removing documents from collections"
+    echo ""
+    echo "🛡️ Best Practices:"
+    echo "   • Always handle errors with try-catch"
+    echo "   • Use nullable return types for operations that can fail"
+    echo "   • Close database connections when done"
+    echo "   • Validate data before sending to database"
+    echo ""
+    echo "🧪 Testing:"
+    echo "   • Unit tests for models and business logic"
+    echo "   • Integration tests for database operations"
+    echo "   • Edge case testing for robustness"
+    echo ""
+    echo "🏗️ Project Organization:"
+    echo "   • Separate models from business logic"
+    echo "   • Keep database operations in service classes"
+    echo "   • Organize tests to match source structure"
+    echo "   • Document code with clear comments"
+}
+
+# Compare with other approaches
+show_comparison() {
+    echo ""
+    print_header "Firebase vs Other Database Approaches"
+    echo ""
+    echo "🔄 Firebase vs SQL Database:"
+    echo ""
+    echo "📊 Data Structure:"
+    echo "   Firebase: Document-based (JSON-like)"
+    echo "   SQL:      Table-based with relationships"
+    echo ""
+    echo "🔍 Queries:"
+    echo "   Firebase: Limited queries, real-time subscriptions"
+    echo "   SQL:      Full SQL with JOINs, complex conditions"
+    echo ""
+    echo "🌐 Deployment:"
+    echo "   Firebase: Cloud-hosted, managed service"
+    echo "   SQL:      Self-hosted or cloud-managed"
+    echo ""
+    echo "⚡ Real-time Features:"
+    echo "   Firebase: Built-in real-time listeners"
+    echo "   SQL:      Requires additional implementation"
+    echo ""
+    echo "💰 Cost Model:"
+    echo "   Firebase: Pay per read/write/storage"
+    echo "   SQL:      Pay for server/instance time"
+    echo ""
+    print_success "Both have their place depending on requirements!"
+}
+
+# Next steps for students
+show_next_steps() {
+    echo ""
+    print_header "Next Steps for Students"
+    echo ""
+    echo "🚀 Immediate Practice:"
+    echo "   1. Modify the FooBar model - add more fields"
+    echo "   2. Create additional query methods in the service"
+    echo "   3. Write more comprehensive tests"
+    echo "   4. Experiment with different data types"
+    echo ""
+    echo "🔧 Technical Improvements:"
+    echo "   5. Add input validation to the model"
+    echo "   6. Implement batch operations for multiple documents"
+    echo "   7. Add error recovery and retry logic"
+    echo "   8. Create a configuration system for different environments"
+    echo ""
+    echo "🌟 Advanced Projects:"
+    echo "   9. Build a Flutter mobile app using this backend"
+    echo "   10. Add user authentication and security rules"
+    echo "   11. Implement real-time data synchronization"
+    echo "   12. Create a web admin interface"
+    echo ""
+    echo "📚 Learning Resources:"
+    echo "   • Firebase Documentation: https://firebase.google.com/docs"
+    echo "   • Dart Language Tour: https://dart.dev/guides/language/language-tour"
+    echo "   • Flutter Development: https://flutter.dev/docs"
+    echo "   • Database Design Principles: Study SQL and NoSQL patterns"
 }
 
 # Show help
 show_help() {
     echo ""
-    echo "Usage: ./run.sh [option]"
+    echo "🆘 Usage: ./run.sh [option]"
     echo ""
-    echo "Options:"
-    echo "  test     - Run tests only"
-    echo "  demo     - Run demo only"
-    echo "  check    - Check Dart installation only"
-    echo "  deps     - Install dependencies only"
-    echo "  cli      - Run Firebase CLI tutorial and demo"
-    echo "  tutorial - View Firebase CLI tutorial (requires Marp)"
-    echo "  help     - Show this help message"
+    echo "Available options:"
+    echo "  structure  - Show project structure overview"
+    echo "  test       - Run unit tests only"
+    echo "  demo       - Run Firebase CRUD demo only"
+    echo "  check      - Check Dart installation only"
+    echo "  deps       - Install dependencies only"
+    echo "  docs       - View Marp documentation slides"
+    echo "  compare    - Compare Firebase vs other databases"
+    echo "  next       - Show next steps for students"
+    echo "  help       - Show this help message"
     echo ""
-    echo "Default (no option): Run full workflow (check, deps, test, demo)"
+    echo "Default (no option): Run complete educational workflow"
     echo ""
-    echo "Examples:"
-    echo "  ./run.sh          # Run everything"
-    echo "  ./run.sh test     # Run tests only"
-    echo "  ./run.sh demo     # Run demo only"
-    echo "  ./run.sh cli      # Firebase CLI tutorial"
-    echo "  ./run.sh tutorial # View CLI tutorial in browser"
-}
-
-# Compare with SQLite version
-show_comparison() {
-    echo ""
-    print_step "🔄 Comparing Firebase vs SQLite versions:"
-    echo ""
-    echo "📁 Project Structure Comparison:"
-    echo "   SQLite:   data/foobar.db (local file)"
-    echo "   Firebase: Cloud Firestore (cloud database)"
-    echo ""
-    echo "🔍 Query Capabilities:"
-    echo "   SQLite:   Full SQL with JOINs, complex conditions"
-    echo "   Firebase: Limited queries, real-time subscriptions"
-    echo ""
-    echo "🌐 Connectivity:"
-    echo "   SQLite:   Local only, no network required"
-    echo "   Firebase: Cloud-based, real-time sync, offline support"
-    echo ""
-    echo "📝 Data Model:"
-    echo "   SQLite:   Relational tables with typed columns"
-    echo "   Firebase: Document-based with flexible JSON structure"
-    echo ""
-    echo "⚡ Real-time Features:"
-    echo "   SQLite:   Manual refresh required"
-    echo "   Firebase: Automatic real-time updates via streams"
-    echo ""
-    echo "🔒 Security:"
-    echo "   SQLite:   File system security"
-    echo "   Firebase: Cloud security rules + authentication"
-    echo ""
-    print_success "Both approaches have their strengths for different use cases!"
-}
-
-# Educational notes
-show_educational_notes() {
-    echo ""
-    print_step "📚 Educational Notes:"
-    echo ""
-    echo "🎯 Learning Objectives Covered:"
-    echo "   ✓ Firebase/Firestore CRUD operations"
-    echo "   ✓ NoSQL document database concepts"
-    echo "   ✓ Real-time data synchronization"
-    echo "   ✓ Cloud vs local database trade-offs"
-    echo "   ✓ Testing with mock services (fake_cloud_firestore)"
-    echo ""
-    echo "🔧 Key Firebase Concepts Demonstrated:"
-    echo "   • Documents and Collections"
-    echo "   • Real-time listeners (Streams)"
-    echo "   • Batch operations"
-    echo "   • Query limitations and workarounds"
-    echo "   • Server timestamps"
-    echo "   • Pagination"
-    echo ""
-    echo "💡 Next Steps for Students:"
-    echo "   1. Compare this with the SQLite version"
-    echo "   2. Set up real Firebase project"
-    echo "   3. Explore Firebase Security Rules"
-    echo "   4. Try building a Flutter app with this backend"
-    echo "   5. Experiment with real-time features"
-}
-
-# Run Firebase CLI demo
-run_cli_demo() {
-    print_step "Running Firebase CLI collection creation demo..."
-    echo ""
-    
-    # Make CLI demo script executable
-    chmod +x firebase-cli-demo.sh
-    
-    # Run the CLI demo
-    ./firebase-cli-demo.sh
-    
-    if [ $? -eq 0 ]; then
-        print_success "Firebase CLI demo completed"
-        echo ""
-        print_step "📚 Next: View the complete CLI tutorial"
-        echo "   cat doc/firebase_cli_tutorial.md"
-        echo "   OR"
-        echo "   ./run.sh tutorial"
-    else
-        print_warning "CLI demo completed with notes"
-    fi
-}
-
-# View Firebase CLI tutorial
-view_cli_tutorial() {
-    print_step "Opening Firebase CLI tutorial..."
-    
-    if command -v npx &> /dev/null; then
-        print_step "Converting tutorial to HTML..."
-        npx @marp-team/marp-cli doc/firebase_cli_tutorial.md --html --output firebase-cli-tutorial.html
-        
-        if [ $? -eq 0 ]; then
-            print_success "Tutorial converted to HTML"
-            
-            # Try to open in browser
-            if command -v open &> /dev/null; then
-                open firebase-cli-tutorial.html
-            elif command -v xdg-open &> /dev/null; then
-                xdg-open firebase-cli-tutorial.html
-            else
-                print_info "Open firebase-cli-tutorial.html in your browser"
-            fi
-        else
-            print_warning "Failed to convert tutorial. Installing Marp..."
-            npm install -g @marp-team/marp-cli
-            npx @marp-team/marp-cli doc/firebase_cli_tutorial.md --html --output firebase-cli-tutorial.html
-        fi
-    else
-        print_warning "npx not found. Showing tutorial in terminal..."
-        echo ""
-        cat doc/firebase_cli_tutorial.md | head -50
-        echo ""
-        print_info "Full tutorial available at: doc/firebase_cli_tutorial.md"
-    fi
+    echo "📝 Examples:"
+    echo "  ./run.sh           # Run everything (recommended for first time)"
+    echo "  ./run.sh test      # Just run the tests"
+    echo "  ./run.sh demo      # Just run the demo"
+    echo "  ./run.sh docs      # View the presentation slides"
+    echo "  ./run.sh structure # See how the project is organized"
 }
 
 # Main execution logic
 main() {
     case ${1:-"all"} in
+        "structure")
+            show_banner
+            show_structure
+            ;;
         "test")
             check_dart
             install_dependencies
@@ -237,37 +382,42 @@ main() {
             check_dart
             install_dependencies
             ;;
-        "cli")
-            run_cli_demo
-            ;;
-        "tutorial")
-            view_cli_tutorial
-            ;;
-        "help")
-            show_help
+        "docs")
+            view_docs
             ;;
         "compare")
             show_comparison
             ;;
-        "notes")
-            show_educational_notes
+        "next")
+            show_next_steps
+            ;;
+        "help")
+            show_help
             ;;
         "all"|*)
+            show_banner
             check_dart
+            echo ""
             install_dependencies
+            echo ""
             run_tests
             echo ""
             run_demo
+            show_educational_summary
             show_comparison
-            show_educational_notes
+            show_next_steps
             ;;
     esac
 }
 
 # Make sure we're in the right directory
 if [ ! -f "pubspec.yaml" ]; then
-    print_error "This script must be run from the Firebase project root directory"
+    print_error "This script must be run from the foobar project root directory"
     print_error "Expected to find pubspec.yaml in current directory"
+    echo ""
+    echo "💡 Make sure you're in the right directory:"
+    echo "   cd /path/to/foobar"
+    echo "   ./run.sh"
     exit 1
 fi
 
@@ -275,12 +425,13 @@ fi
 main "$@"
 
 echo ""
-print_success "🎉 Firebase CRUD Educational Demo Complete!"
+print_success "🎉 Firebase FooBar Educational Demo Complete!"
 echo ""
-echo "📖 Additional Resources:"
-echo "   • Firebase Documentation: https://firebase.google.com/docs"
-echo "   • Dart/Flutter Firebase: https://firebase.flutter.dev/"
-echo "   • Firestore Documentation: https://firebase.google.com/docs/firestore"
+echo "📖 Key Takeaways:"
+echo "   • Firebase provides simple CRUD operations for NoSQL data"
+echo "   • Proper error handling is essential for robust applications"
+echo "   • Testing helps ensure code quality and catches regressions"
+echo "   • Good project structure makes code maintainable"
+echo "   • Documentation helps others (and future you) understand the code"
 echo ""
-echo "🔄 To compare with SQLite version:"
-echo "   cd ../sqlite && ./run.sh"
+echo "💬 Questions? Review the slides or ask during class!"

@@ -1,284 +1,233 @@
-# Firebase CRUD Operations - Educational Project
+# Firebase FooBar CRUD Demo
 
-🎓 **A comprehensive educational project demonstrating Firebase Firestore CRUD operations in Dart**
+A simple educational project demonstrating Firebase/Firestore CRUD operations using Dart.
 
-This project mirrors the SQLite version but uses Firebase Firestore as the cloud database backend, showcasing the differences between local and cloud database approaches.
+## 🎯 Learning Objectives
 
-## 📚 Educational Objectives
+This project helps students understand:
+- Firebase/Firestore CRUD operations (Create, Read, Update, Delete)
+- Data modeling with Dart classes
+- Serialization for database storage
+- Error handling in database operations
+- Unit testing for database applications
+- Project structure and organization
 
-Students will learn:
-
-- **Firebase Firestore** concepts and operations
-- **NoSQL document database** vs relational database differences  
-- **Real-time data synchronization** capabilities
-- **Cloud database** advantages and trade-offs
-- **Testing strategies** for cloud services
-- **CRUD operations** in modern cloud databases
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
-firebase/
+foobar/
 ├── lib/
 │   ├── models/
-│   │   └── foobar.dart                 # FooBar model with Firebase support
+│   │   └── foobar.dart                    # Simple data model (foo: String, bar: int)
 │   ├── services/
-│   │   └── foobar_crud_firebase.dart   # Firebase CRUD operations
-│   └── main.dart                       # Demo application
-├── test/
-│   └── foobar_crud_test.dart           # Comprehensive tests
-├── doc/
-│   └── firebase_tutorial.md            # Educational presentation
-├── pubspec.yaml                        # Project dependencies
-├── run.sh                              # Easy run script
-└── README.md                           # This file
+│   │   └── foobar_crud_firebase.dart      # All CRUD operations
+│   ├── main.dart                          # Demo application
+│   └── firebase-config.json              # Firebase configuration
+├── test/                                  # Unit tests
+│   ├── foobar_model_test.dart            # Model testing
+│   ├── foobar_service_test.dart          # Service testing
+│   └── main_test.dart                    # Main app testing
+├── doc/                                   # Documentation
+│   ├── firebase_crud_slides.md           # Main tutorial slides
+│   └── firebase_best_practices.md        # Advanced concepts
+├── pubspec.yaml                          # Dependencies
+└── run.sh                                # Educational script
 ```
 
 ## 🚀 Quick Start
 
-### Option 1: Use the Run Script (Recommended)
+### Prerequisites
+- Dart SDK installed ([installation guide](https://dart.dev/get-dart))
 
-```bash
-# Make script executable (one time only)
-chmod +x run.sh
+### Running the Demo
 
-# Run everything (tests + demo + educational notes)
-./run.sh
+1. **Easy way (recommended for first time):**
+   ```bash
+   ./run.sh
+   ```
+   This runs the complete educational workflow: checks dependencies, runs tests, demonstrates CRUD operations, and shows learning summaries.
 
-# Or run specific parts
-./run.sh test     # Tests only
-./run.sh demo     # Demo only  
-./run.sh compare  # Compare with SQLite
-```
+2. **Individual components:**
+   ```bash
+   ./run.sh test      # Run unit tests only
+   ./run.sh demo      # Run CRUD demo only
+   ./run.sh docs      # View presentation slides
+   ./run.sh structure # Show project organization
+   ```
 
-### Option 2: Manual Commands
+3. **Manual approach:**
+   ```bash
+   dart pub get          # Install dependencies
+   dart test             # Run tests
+   dart run lib/main.dart # Run demo
+   ```
 
-```bash
-# Install dependencies
-dart pub get
+## 📚 What You'll Learn
 
-# Run tests (works without real Firebase setup)
-dart test
+### 1. Data Modeling (`lib/models/foobar.dart`)
+- Simple Dart class with two fields: `foo` (String) and `bar` (int)
+- Serialization methods for Firebase storage
+- Copy methods for immutable updates
+- Proper equality and toString implementations
 
-# Run demo application
-dart run lib/main.dart
-```
+### 2. CRUD Operations (`lib/services/foobar_crud_firebase.dart`)
+- **CREATE**: Add new documents to Firebase
+- **READ**: Retrieve single documents and collections
+- **QUERY**: Filter documents with where clauses
+- **UPDATE**: Modify existing documents (full and partial)
+- **DELETE**: Remove documents from collections
 
-## 🔥 Firebase vs SQLite Comparison
+### 3. Error Handling
+- Try-catch blocks for all async operations
+- Graceful failure with null returns
+- Logging for debugging and monitoring
 
-| Feature | SQLite | Firebase |
-|---------|--------|----------|
-| **Storage** | Local file (`data/foobar.db`) | Cloud database |
-| **Data Model** | Relational tables | Document collections |
-| **IDs** | Auto-increment integers | Auto-generated strings |
-| **Queries** | Full SQL with JOINs | Limited but fast queries |
-| **Real-time** | Manual refresh | Automatic streams |
-| **Offline** | Always works offline | Smart offline sync |
-| **Setup** | Simple file creation | Cloud configuration |
-| **Testing** | Direct database access | Mock services |
+### 4. Testing (`test/` directory)
+- Unit tests for data models
+- Service structure validation
+- Edge case handling
+- Test organization and best practices
 
-## 📊 Key Educational Concepts
+## 🔥 Key Concepts Demonstrated
 
-### 1. Document vs Relational Data
-
-**SQLite (Relational)**:
-```sql
-CREATE TABLE foobars (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  foo TEXT NOT NULL,
-  bar INTEGER NOT NULL
-);
-```
-
-**Firebase (Document)**:
-```json
-{
-  "foobars": {
-    "auto-id-1": {"foo": "Hello", "bar": 42},
-    "auto-id-2": {"foo": "World", "bar": 100}
-  }
-}
-```
-
-### 2. Real-time Capabilities
-
-**Firebase Advantage**: Built-in real-time streams
+### Firebase/Firestore Basics
 ```dart
-// Listen to live data changes
-Stream<List<FooBar>> streamAll() {
-  return _collection.snapshots().map((snapshot) => 
-    snapshot.docs.map((doc) => FooBar.fromDocument(doc)).toList()
+// Initialize connection
+await crudService.initialize();
+
+// Create a document
+FooBar newItem = FooBar(foo: 'hello', bar: 42);
+FooBar? created = await crudService.create(newItem);
+
+// Read documents
+List<FooBar> all = await crudService.readAll();
+FooBar? single = await crudService.read(documentId);
+
+// Query with filters
+List<FooBar> filtered = await crudService.readByBar(42);
+
+// Update documents
+await crudService.update(id, updatedItem);
+await crudService.updateFields(id, {'foo': 'updated'});
+
+// Delete documents
+await crudService.delete(id);
+
+// Always close when done
+crudService.close();
+```
+
+### Data Serialization
+```dart
+// Convert to Map for Firebase storage
+Map<String, dynamic> toMap() {
+  return {'foo': foo, 'bar': bar};
+}
+
+// Create from Map (from Firebase)
+static FooBar fromMap(Map<String, dynamic> map, [String? id]) {
+  return FooBar(
+    id: id,
+    foo: map['foo'] ?? '',
+    bar: map['bar'] ?? 0,
   );
 }
 ```
 
-### 3. Query Differences
+## 🧪 Testing
 
-**SQLite**: Powerful SQL queries
-```dart
-// Complex search with LIKE
-await db.select("SELECT * FROM foobars WHERE foo LIKE '%search%'");
-```
-
-**Firebase**: Simple queries with limitations
-```dart
-// Exact match only, no LIKE equivalent
-await _collection.where('foo', isEqualTo: 'search').get();
-
-// Workaround: Client-side filtering
-final all = await readAll();
-return all.where((item) => item.foo.contains('search')).toList();
-```
-
-## 🧪 Testing Strategy
-
-The project uses **fake_cloud_firestore** to test Firebase operations without requiring real Firebase setup:
-
-```dart
-setUp(() {
-  fakeFirestore = FakeFirebaseFirestore();
-  crudService = FooBarCrudFirebase(firestore: fakeFirestore);
-});
-
-test('CREATE: Should add a new document', () async {
-  final id = await crudService.create(testFooBar);
-  expect(id, isNotEmpty); // Firebase returns string IDs
-});
-```
-
-**Educational Value**: Shows how to test cloud services effectively during development.
-
-## 🔧 Technical Features Demonstrated
-
-### CRUD Operations
-- ✅ **Create**: Add documents with auto-generated IDs
-- ✅ **Read**: Query individual documents and collections
-- ✅ **Update**: Full document and partial field updates
-- ✅ **Delete**: Single documents and batch deletions
-
-### Advanced Features
-- ✅ **Real-time streams**: Live data synchronization
-- ✅ **Pagination**: Efficient large dataset handling
-- ✅ **Batch operations**: Multiple operations atomically
-- ✅ **Range queries**: Numeric range filtering
-- ✅ **Text search**: Client-side filtering workarounds
-
-### Error Handling
-- ✅ **Exception handling**: Firebase-specific error types
-- ✅ **Offline scenarios**: Graceful degradation
-- ✅ **Validation**: Data integrity checks
-
-## 📖 Educational Resources
-
-### 1. Tutorial Presentation
-Read the comprehensive tutorial: [`doc/firebase_tutorial.md`](doc/firebase_tutorial.md)
-
-### 2. Code Examples
-- **Model**: [`lib/models/foobar.dart`](lib/models/foobar.dart) - Firebase document modeling
-- **CRUD Service**: [`lib/services/foobar_crud_firebase.dart`](lib/services/foobar_crud_firebase.dart) - All operations
-- **Tests**: [`test/foobar_crud_test.dart`](test/foobar_crud_test.dart) - Comprehensive testing
-- **Demo**: [`lib/main.dart`](lib/main.dart) - Usage examples
-
-### 3. Comparison with SQLite
-Compare this project with the SQLite version in `../sqlite/` to understand the differences between local and cloud databases.
-
-## 🎯 Learning Exercises
-
-### Beginner (Follow Along)
-1. Run the demo and observe the output
-2. Run the tests and understand what they verify
-3. Compare the model class with the SQLite version
-4. Identify Firebase-specific features in the CRUD service
-
-### Intermediate (Modify)
-1. Add a new field to the FooBar model (e.g., `description`)
-2. Implement a new search method
-3. Add validation to the create/update methods
-4. Create tests for your new features
-
-### Advanced (Extend)
-1. Implement real Firebase setup (create Firebase project)
-2. Add Firebase Authentication
-3. Implement Firebase Security Rules
-4. Create a Flutter app using this backend
-5. Add real-time collaboration features
-
-## 🔄 Comparison Commands
+The project includes comprehensive tests:
 
 ```bash
-# Run Firebase version
-cd firebase/
-./run.sh
+# Run all tests
+dart test
 
-# Run SQLite version for comparison
-cd ../sqlite/
-./run.sh
+# Run with detailed output
+dart test --reporter=expanded
 
-# Compare the models
-diff sqlite/lib/models/foobar.dart firebase/lib/models/foobar.dart
-
-# Compare the CRUD services
-diff sqlite/lib/services/foobar_crud_sqlite.dart firebase/lib/services/foobar_crud_firebase.dart
+# Run specific test file
+dart test test/foobar_model_test.dart
 ```
 
-## 💡 When to Use Firebase vs SQLite
+**Test Coverage:**
+- Model validation and serialization
+- Service method availability
+- Random data generation
+- Edge cases and error conditions
 
-### Choose Firebase When:
-- Building **multi-user applications**
-- Need **real-time synchronization**
-- Want **automatic scaling**
-- Developing **mobile/web apps**
-- Require **offline-online sync**
+## 📖 Documentation
 
-### Choose SQLite When:
-- Building **single-user applications**
-- Need **complex relational queries**
-- Want **full control** over data
-- Developing **desktop applications**
-- Require **guaranteed offline access**
+Interactive presentation slides are available in the `doc/` directory:
 
-## 🔧 Prerequisites
+1. **`firebase_crud_slides.md`** - Main tutorial covering CRUD operations
+2. **`firebase_best_practices.md`** - Advanced concepts and best practices
 
-- **Dart SDK** (3.0.0 or higher)
-- **Understanding of basic programming concepts**
-- **Familiarity with CRUD operations** (recommended)
+View as slides using Marp:
+```bash
+npx @marp-team/marp-cli doc/firebase_crud_slides.md --html
+```
 
-## 📦 Dependencies
+Or use the convenient script:
+```bash
+./run.sh docs
+```
 
-- `firebase_core`: Firebase initialization
-- `cloud_firestore`: Firestore database operations
-- `fake_cloud_firestore`: Testing without real Firebase
-- `test`: Testing framework
-- `uuid`: Unique identifier generation
-- `intl`: Date/time formatting
+## 🔧 Configuration
 
-## 🎉 Expected Outcomes
+The project uses a test Firebase configuration in `lib/firebase-config.json`. For production use:
 
-After completing this project, students will:
+1. Create your own Firebase project at [Firebase Console](https://console.firebase.google.com)
+2. Set up Firestore database
+3. Update the configuration file with your project details
+4. Set up security rules for production
 
-1. **Understand** the differences between SQL and NoSQL databases
-2. **Appreciate** real-time database capabilities
-3. **Recognize** when to choose cloud vs local databases
-4. **Know** how to test cloud services effectively
-5. **Be prepared** to build modern real-time applications
+## 🚨 Common Issues
 
-## 🚀 Next Steps
+### "Dart not found"
+Install Dart SDK from https://dart.dev/get-dart
 
-1. **Compare** this with the SQLite version
-2. **Set up** a real Firebase project
-3. **Explore** Firebase Authentication and Security Rules
-4. **Build** a Flutter app using this backend
-5. **Learn** about other Firebase services (Functions, Storage)
+### "Permission denied" when running run.sh
+Make the script executable:
+```bash
+chmod +x run.sh
+```
+
+### Firebase connection errors
+This is expected with the demo configuration. The project includes error handling to demonstrate how operations would work with a real Firebase setup.
+
+## 🎓 For Students
+
+### Next Steps
+1. **Modify the model** - Add more fields to FooBar
+2. **Extend queries** - Add more filtering options
+3. **Improve error handling** - Add retry logic
+4. **Add validation** - Validate data before database operations
+5. **Build a UI** - Create a Flutter app using this backend
+
+### Learning Path
+1. Start with this simple example
+2. Understand each CRUD operation
+3. Run and modify the tests
+4. Read the documentation slides
+5. Experiment with the code
+6. Build your own Firebase project
+
+## 📚 Additional Resources
+
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Dart Language Tour](https://dart.dev/guides/language/language-tour)
+- [Flutter Development](https://flutter.dev/docs)
+- [FireDart Package](https://pub.dev/packages/firedart)
+
+## 💬 Support
+
+- Review the presentation slides in the `doc/` directory
+- Check the comprehensive comments in the source code
+- Run `./run.sh help` for command options
+- Ask questions during class or office hours
 
 ---
 
-## 📧 Questions?
+**Happy Learning!** 🚀
 
-This project is designed for educational purposes to demonstrate cloud database concepts. 
-
-For additional resources:
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Dart Language Tour](https://dart.dev/guides/language/language-tour)
-- [Flutter Firebase Documentation](https://firebase.flutter.dev/)
-
-**Happy Learning! 🎓**
+This project provides a solid foundation for understanding Firebase CRUD operations and serves as a stepping stone to more complex database applications.

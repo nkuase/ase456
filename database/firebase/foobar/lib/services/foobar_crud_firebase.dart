@@ -1,329 +1,198 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firedart/firedart.dart';
 import '../models/foobar.dart';
 
-/// CRUD (Create, Read, Update, Delete) operations for FooBar entities using Firebase Firestore
-/// This class demonstrates fundamental cloud database operations for teaching purposes
+/// Simple CRUD service for FooBar documents in Firebase
+/// 
+/// This service demonstrates:
+/// - Firebase initialization
+/// - Create, Read, Update, Delete operations
+/// - Error handling
+/// - Collection management
 class FooBarCrudFirebase {
-  final FirebaseFirestore _firestore;
+  late Firestore _firestore;
   final String _collectionName = 'foobars';
 
-  /// Constructor allows injection of FirebaseFirestore instance
-  /// This enables testing with fake_cloud_firestore
-  FooBarCrudFirebase({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
-  /// Gets the collection reference for foobars
-  CollectionReference get _collection => _firestore.collection(_collectionName);
-
-  /// CREATE: Add a new FooBar document to Firestore
-  /// Returns the document ID of the created record
-  Future<String> create(FooBar foobar) async {
+  /// Initialize Firebase connection
+  /// Call this before using any other methods
+  Future<void> initialize({String projectId = 'foobar-a1317'}) async {
     try {
-      // Add server timestamp automatically
-      final data = foobar.toJson();
-      data['createdAt'] = FieldValue.serverTimestamp();
+      print('🔥 Initializing Firebase...');
+      Firestore.initialize(projectId);
+      _firestore = Firestore.instance;
+      print('✅ Firebase initialized successfully');
+    } catch (e) {
+      print('❌ Firebase initialization failed: $e');
+      rethrow;
+    }
+  }
 
-      // Add document to collection
-      final docRef = await _collection.add(data);
+  /// CREATE: Add a new FooBar document
+  /// Returns the created document with its ID
+  Future<FooBar?> create(FooBar foobar) async {
+    try {
+      print('📝 Creating new FooBar: ${foobar.foo}');
       
-      return docRef.id;
+      // Add document to collection
+      Document doc = await _firestore
+          .collection(_collectionName)
+          .add(foobar.toMap());
+      
+      print('✅ FooBar created with ID: ${doc.id}');
+      
+      // Return the FooBar with the new ID
+      return foobar.copyWith(id: doc.id);
     } catch (e) {
-      throw Exception('Failed to create FooBar: $e');
+      print('❌ Error creating FooBar: $e');
+      return null;
     }
   }
 
-  /// READ: Get all FooBar documents from Firestore
-  /// Returns a list of all FooBar objects ordered by creation time
-  Future<List<FooBar>> readAll() async {
-    try {
-      final querySnapshot = await _collection
-          .orderBy('createdAt', descending: false)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => FooBar.fromDocument(doc))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to read all FooBars: $e');
-    }
-  }
-
-  /// READ: Get a FooBar document by ID
-  /// Returns null if document not found
+  /// READ: Get a single FooBar by ID
   Future<FooBar?> read(String id) async {
     try {
-      final docSnapshot = await _collection.doc(id).get();
+      print('📖 Reading FooBar with ID: $id');
       
-      if (!docSnapshot.exists) {
-        return null;
-      }
-
-      return FooBar.fromDocument(docSnapshot);
-    } catch (e) {
-      throw Exception('Failed to read FooBar with ID $id: $e');
-    }
-  }
-
-  /// READ: Find FooBar documents by foo field (like a search)
-  /// Uses Firestore queries to find matching documents
-  /// Returns a list of matching FooBar objects
-  Future<List<FooBar>> findByFoo(String foo) async {
-    try {
-      // Note: Firestore doesn't have a LIKE operator, so we use different approaches
-      // Approach 1: Exact match
-      final querySnapshot = await _collection
-          .where('foo', isEqualTo: foo)
-          .orderBy('createdAt')
+      // Get document by ID
+      Document doc = await _firestore
+          .collection(_collectionName)
+          .document(id)
           .get();
-
-      return querySnapshot.docs
-          .map((doc) => FooBar.fromDocument(doc))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to find FooBars by foo: $e');
-    }
-  }
-
-  /// READ: Find FooBar documents by foo field with text search simulation
-  /// Since Firestore doesn't have full-text search, we implement a simple solution
-  /// For production apps, consider using Algolia or Elasticsearch
-  Future<List<FooBar>> findByFooContains(String searchText) async {
-    try {
-      // Get all documents and filter client-side
-      // Note: This is not efficient for large datasets!
-      final allFooBars = await readAll();
       
-      return allFooBars
-          .where((foobar) => 
-              foobar.foo.toLowerCase().contains(searchText.toLowerCase()))
-          .toList();
+      // Convert to FooBar object
+      FooBar foobar = FooBar.fromMap(doc.map, doc.id);
+      print('✅ FooBar retrieved: $foobar');
+      
+      return foobar;
     } catch (e) {
-      throw Exception('Failed to search FooBars: $e');
+      print('❌ Error reading FooBar: $e');
+      return null;
     }
   }
 
-  /// READ: Find FooBar documents by bar value range
-  /// Demonstrates Firestore range queries
-  Future<List<FooBar>> findByBarRange(int minBar, int maxBar) async {
+  /// READ: Get all FooBar documents
+  Future<List<FooBar>> readAll() async {
     try {
-      final querySnapshot = await _collection
-          .where('bar', isGreaterThanOrEqualTo: minBar)
-          .where('bar', isLessThanOrEqualTo: maxBar)
-          .orderBy('bar')
+      print('📚 Reading all FooBar documents...');
+      
+      // Get all documents from collection
+      List<Document> docs = await _firestore
+          .collection(_collectionName)
           .get();
-
-      return querySnapshot.docs
-          .map((doc) => FooBar.fromDocument(doc))
+      
+      // Convert to FooBar objects
+      List<FooBar> foobars = docs
+          .map((doc) => FooBar.fromMap(doc.map, doc.id))
           .toList();
+      
+      print('✅ Retrieved ${foobars.length} FooBar documents');
+      return foobars;
     } catch (e) {
-      throw Exception('Failed to find FooBars by bar range: $e');
+      print('❌ Error reading all FooBars: $e');
+      return [];
     }
   }
 
-  /// UPDATE: Update an existing FooBar document
-  /// Returns true if successful, false if document not found
-  Future<bool> update(String id, FooBar foobar) async {
+  /// READ: Query FooBar documents where bar value equals the given number
+  Future<List<FooBar>> readByBar(int barValue) async {
     try {
-      final docRef = _collection.doc(id);
+      print('🔍 Querying FooBars where bar = $barValue');
       
-      // Check if document exists
-      final docSnapshot = await docRef.get();
-      if (!docSnapshot.exists) {
-        return false;
-      }
+      // Query documents with filter
+      List<Document> docs = await _firestore
+          .collection(_collectionName)
+          .where('bar', isEqualTo: barValue)
+          .get();
+      
+      // Convert to FooBar objects
+      List<FooBar> foobars = docs
+          .map((doc) => FooBar.fromMap(doc.map, doc.id))
+          .toList();
+      
+      print('✅ Found ${foobars.length} FooBars with bar = $barValue');
+      return foobars;
+    } catch (e) {
+      print('❌ Error querying FooBars: $e');
+      return [];
+    }
+  }
 
-      // Update the document
-      final data = foobar.toJson();
-      data['updatedAt'] = FieldValue.serverTimestamp();
+  /// UPDATE: Modify an existing FooBar document
+  Future<bool> update(String id, FooBar updatedFoobar) async {
+    try {
+      print('✏️ Updating FooBar with ID: $id');
+      print('   New data: $updatedFoobar');
       
-      await docRef.update(data);
+      // Update document
+      await _firestore
+          .collection(_collectionName)
+          .document(id)
+          .update(updatedFoobar.toMap());
+      
+      print('✅ FooBar updated successfully');
       return true;
     } catch (e) {
-      throw Exception('Failed to update FooBar with ID $id: $e');
+      print('❌ Error updating FooBar: $e');
+      return false;
     }
   }
 
-  /// UPDATE: Update specific fields of a FooBar document
-  /// More efficient than updating the entire document
-  Future<bool> updateFields(String id, Map<String, dynamic> fields) async {
+  /// UPDATE: Partially update specific fields
+  Future<bool> updateFields(String id, Map<String, dynamic> updates) async {
     try {
-      final docRef = _collection.doc(id);
+      print('✏️ Updating FooBar fields for ID: $id');
+      print('   Updates: $updates');
       
-      // Check if document exists
-      final docSnapshot = await docRef.get();
-      if (!docSnapshot.exists) {
-        return false;
-      }
-
-      // Add update timestamp
-      fields['updatedAt'] = FieldValue.serverTimestamp();
+      // Update specific fields
+      await _firestore
+          .collection(_collectionName)
+          .document(id)
+          .update(updates);
       
-      await docRef.update(fields);
+      print('✅ FooBar fields updated successfully');
       return true;
     } catch (e) {
-      throw Exception('Failed to update FooBar fields for ID $id: $e');
+      print('❌ Error updating FooBar fields: $e');
+      return false;
     }
   }
 
-  /// DELETE: Remove a FooBar document by ID
-  /// Returns true if successful, false if document not found
+  /// DELETE: Remove a FooBar document
   Future<bool> delete(String id) async {
     try {
-      final docRef = _collection.doc(id);
+      print('🗑️ Deleting FooBar with ID: $id');
       
-      // Check if document exists
-      final docSnapshot = await docRef.get();
-      if (!docSnapshot.exists) {
-        return false;
-      }
-
-      await docRef.delete();
+      // Delete document
+      await _firestore
+          .collection(_collectionName)
+          .document(id)
+          .delete();
+      
+      print('✅ FooBar deleted successfully');
       return true;
     } catch (e) {
-      throw Exception('Failed to delete FooBar with ID $id: $e');
+      print('❌ Error deleting FooBar: $e');
+      return false;
     }
   }
 
-  /// DELETE: Remove all FooBar documents (use with extreme caution!)
-  /// Returns the number of deleted documents
-  /// Note: Firestore doesn't have a "delete all" operation, so we do it in batches
-  Future<int> deleteAll() async {
-    try {
-      int deletedCount = 0;
-      
-      // Get all documents
-      final querySnapshot = await _collection.get();
-      
-      // Delete in batches (Firestore batch limit is 500 operations)
-      const batchSize = 500;
-      final batch = _firestore.batch();
-      
-      for (int i = 0; i < querySnapshot.docs.length; i++) {
-        batch.delete(querySnapshot.docs[i].reference);
-        deletedCount++;
-        
-        // Commit batch if we reach the limit
-        if ((i + 1) % batchSize == 0) {
-          await batch.commit();
-          // Start a new batch
-          final newBatch = _firestore.batch();
-        }
-      }
-      
-      // Commit any remaining operations
-      await batch.commit();
-      
-      return deletedCount;
-    } catch (e) {
-      throw Exception('Failed to delete all FooBars: $e');
-    }
-  }
-
-  /// Get count of all documents
-  /// Useful for statistics and pagination
-  /// Note: Firestore count() is only available in some SDKs, so we use aggregation
+  /// Get the count of all documents (utility method)
   Future<int> count() async {
     try {
-      final querySnapshot = await _collection.count().get();
-      return querySnapshot.count;
+      List<Document> docs = await _firestore
+          .collection(_collectionName)
+          .get();
+      return docs.length;
     } catch (e) {
-      // Fallback: Count by getting all documents (not efficient for large collections)
-      try {
-        final allDocs = await _collection.get();
-        return allDocs.docs.length;
-      } catch (fallbackError) {
-        throw Exception('Failed to count FooBars: $e');
-      }
+      print('❌ Error counting documents: $e');
+      return 0;
     }
   }
 
-  /// Check if a document exists by ID
-  /// Returns true if exists, false otherwise
-  Future<bool> exists(String id) async {
-    try {
-      final docSnapshot = await _collection.doc(id).get();
-      return docSnapshot.exists;
-    } catch (e) {
-      throw Exception('Failed to check if FooBar exists with ID $id: $e');
-    }
-  }
-
-  /// READ: Get paginated results
-  /// Useful for large datasets to avoid loading everything at once
-  Future<List<FooBar>> readPaginated({
-    int limit = 10,
-    DocumentSnapshot? startAfter,
-  }) async {
-    try {
-      Query query = _collection
-          .orderBy('createdAt', descending: false)
-          .limit(limit);
-
-      if (startAfter != null) {
-        query = query.startAfterDocument(startAfter);
-      }
-
-      final querySnapshot = await query.get();
-      return querySnapshot.docs
-          .map((doc) => FooBar.fromDocument(doc))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to read paginated FooBars: $e');
-    }
-  }
-
-  /// Listen to real-time updates for all FooBar documents
-  /// Returns a stream of FooBar lists that updates in real-time
-  /// This is a powerful feature of Firestore - real-time synchronization!
-  Stream<List<FooBar>> streamAll() {
-    try {
-      return _collection
-          .orderBy('createdAt', descending: false)
-          .snapshots()
-          .map((querySnapshot) => querySnapshot.docs
-              .map((doc) => FooBar.fromDocument(doc))
-              .toList());
-    } catch (e) {
-      throw Exception('Failed to stream FooBars: $e');
-    }
-  }
-
-  /// Listen to real-time updates for a specific FooBar document
-  /// Returns a stream of FooBar that updates in real-time
-  Stream<FooBar?> streamById(String id) {
-    try {
-      return _collection
-          .doc(id)
-          .snapshots()
-          .map((docSnapshot) {
-            if (!docSnapshot.exists) return null;
-            return FooBar.fromDocument(docSnapshot);
-          });
-    } catch (e) {
-      throw Exception('Failed to stream FooBar with ID $id: $e');
-    }
-  }
-
-  /// Batch create multiple FooBar documents
-  /// More efficient than creating one by one
-  Future<List<String>> createBatch(List<FooBar> foobars) async {
-    try {
-      final batch = _firestore.batch();
-      final docIds = <String>[];
-
-      for (final foobar in foobars) {
-        final docRef = _collection.doc(); // Auto-generate ID
-        final data = foobar.toJson();
-        data['createdAt'] = FieldValue.serverTimestamp();
-        
-        batch.set(docRef, data);
-        docIds.add(docRef.id);
-      }
-
-      await batch.commit();
-      return docIds;
-    } catch (e) {
-      throw Exception('Failed to create batch FooBars: $e');
-    }
+  /// Close Firebase connection
+  /// Call this when you're done with Firebase operations
+  void close() {
+    print('🔒 Closing Firebase connection...');
+    _firestore.close();
+    print('✅ Firebase connection closed');
   }
 }

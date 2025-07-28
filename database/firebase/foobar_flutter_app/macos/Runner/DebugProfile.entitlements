@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Enable App Sandbox -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	
+	<!-- Network Access - Required for Firebase -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	
+	<!-- Network Server - Required for Firebase realtime features -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	
+	<!-- JIT Compilation - Required for Flutter/Dart runtime -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	
+	<!-- Disable inherited restrictions -->
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+	
+	<!-- Allow unsigned executable memory - Required for Flutter -->
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+	
+	<!-- Debug-specific entitlements -->
+	<key>com.apple.security.get-task-allow</key>
+	<true/>
+</dict>
+</plist>

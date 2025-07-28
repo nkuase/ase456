@@ -10,27 +10,37 @@
   <button id="addBtn">Add Document</button>
   <p id="result"></p>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAoMJ3CgsibJSYAroSfJxlVhZNqMOCs2Sk",
-      authDomain: "foobar-ecfa8.firebaseapp.com",
-      projectId: "foobar-ecfa8",
-      storageBucket: "foobar-ecfa8.firebasestorage.app",
-      messagingSenderId: "40658006056",
-      appId: "1:40658006056:web:36ee62fa812738d8a3c51d",
-      measurementId: "G-RFS3VX4BNV"
-    };
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBSbJH_KjAlit7r5YgtEnL0ovx9_bgvw5o",
+    authDomain: "foobar-a1317.firebaseapp.com",
+    projectId: "foobar-a1317",
+    storageBucket: "foobar-a1317.firebasestorage.app",
+    messagingSenderId: "827133271343",
+    appId: "1:827133271343:web:df08d3f04ca4968ca815da",
+    measurementId: "G-5VN183B3VR"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+  
+  // End
 
     document.getElementById("addBtn").addEventListener("click", async () => {
       const resultElem = document.getElementById("result");
       try {
-        const docRef = await addDoc(collection(db, "foobar"), {
+        const docRef = await addDoc(collection(db, "foo"), {
           foo: "Hello",
           bar: 23
         });
