@@ -1,0 +1,6 @@
+# Keep this directory in git but ignore database files
+# Database files are generated at runtime
+*.db
+*.db-journal
+*.db-wal
+*.db-shm

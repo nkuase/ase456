@@ -1,4 +1,6 @@
 // The FooBar class (your model)
+import 'package:sqlite3/sqlite3.dart';
+
 class FooBar {
   String foo;
   int bar;
@@ -16,9 +18,9 @@ class FooBar {
   }
 
   Map<String, dynamic> toMap() => {
-    'foo': foo,
-    'bar': bar,
-  };
+        'foo': foo,
+        'bar': bar,
+      };
 
   @override
   bool operator ==(Object other) {

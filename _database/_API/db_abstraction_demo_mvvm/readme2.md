@@ -1,1 +1,0 @@
-Service-based architecture with Provider for state management
