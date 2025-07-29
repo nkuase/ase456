@@ -44,7 +44,6 @@ double getArea(Shape shape) => switch (shape) {
   Rectangle(width: var w, height: var h) => w * h,
   Square(side: var s) => s * s,
   Triangle(base: var b, height: var h) => 0.5 * b * h,
-  // TODO: Handle this case.
   Shape() => throw UnimplementedError(),
 };
 
@@ -59,7 +58,7 @@ String getShapeDescription(Shape shape) => switch (shape) {
   Square(side: var s) when s > 10 => 'Large square with side $s',
   Square(side: var s) => 'Square with side $s',
   Triangle() => 'Triangle shape',
-  // TODO: Handle this case.
+
   Shape() => throw UnimplementedError(),
 };
 
@@ -83,16 +82,15 @@ String analyzeList(List<int> numbers) => switch (numbers) {
   [var first, ...var rest] when rest.length > 5 =>
     'Long list starting with $first',
   [var first, ...var rest] =>
-    'List of ${numbers.length} elements starting with $first',
+    'List of ${numbers.length} elements starting with $first and ending with ${rest.last}',
 };
 
 // Pattern matching with maps
 String analyzeUser(Map<String, dynamic> user) => switch (user) {
   {'name': String name, 'age': int age} when age >= 18 => 'Adult: $name',
-  {'name': String name, 'age': int age} => 'Minor: $name',
+  {'name': String name, 'age': int age} => 'Minor: $name and age $age',
   {'name': String name} => 'User: $name (age unknown)',
   Map() => 'Empty user data',
-  _ => 'Invalid user format',
 };
 
 void demonstratePatternMatching() {
@@ -149,45 +147,20 @@ void demonstratePatternMatching() {
   }
 }
 
-// Advanced pattern matching example with sealed classes
-sealed class Result<T> {}
-
-class Success<T> extends Result<T> {
-  final T value;
-  Success(this.value);
-}
-
-class Error<T> extends Result<T> {
-  final String message;
-  Error(this.message);
-}
-
-class Loading<T> extends Result<T> {}
-
-String handleResult<T>(Result<T> result) => switch (result) {
-  Success(value: var v) => 'Success: $v',
-  Error(message: var msg) => 'Error: $msg',
-  Loading() => 'Loading...',
-};
-
-void demonstrateAdvancedPatternMatching() {
-  print('\n=== ADVANCED PATTERN MATCHING (SEALED CLASSES) ===\n');
-
-  var results = <Result<String>>[
-    Success<String>("Data loaded successfully"),
-    Error<String>("Network connection failed"),
-    Loading<String>(),
-  ];
-
-  //   for (var result in results) {
-  for (Result<String> result in results) {
-    print(handleResult(result));
-  }
-}
-
 // ============================================
 // 9. PATTERN MATCHING (IF CASE)
 // ============================================
+// User class for pattern matching examples
+class User {
+  final String name;
+  final int age;
+  final String email;
+
+  User({required this.name, required this.age, this.email = ""});
+
+  @override
+  String toString() => 'User(name: $name, age: $age, email: $email)';
+}
 
 void patternMatchingExample() {
   print('\n=== Pattern Matching Examples ===');
@@ -213,7 +186,6 @@ void patternMatchingExample() {
 
 void main() async {
   print('=== DART EXAMPLES FROM LECTURE ===\n');
-  patternMatchingExample();
   demonstratePatternMatching();
-  demonstrateAdvancedPatternMatching();
+  patternMatchingExample();
 }

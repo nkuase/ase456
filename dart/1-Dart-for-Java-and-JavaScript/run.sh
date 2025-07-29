@@ -10,6 +10,8 @@ echo
 
 # Set the directory to search for Dart files
 # Use provided argument or default to current directory
+#	`${1}` refers to the first positional argument passed to the script or function.
+#	The `:-.` part provides a default value: if no first argument is provided (i.e., `$1` is empty or unset), the value will be `.` (which means the current directory).
 SEARCH_DIR="${1:-.}"
 
 # Check if dart command is available
