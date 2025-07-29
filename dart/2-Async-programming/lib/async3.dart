@@ -1,10 +1,11 @@
+//No Test
 Future<int> getNumber() {
   return Future.delayed(Duration(seconds: 1), () {
     return 42;
   });
 }
 
-void main() async {
-  int res = await getNumber();
+void main() {
+  var res = getNumber();
   print(res);
 }

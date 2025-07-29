@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """
-Dart Test Template Generator
-===========================
+Dart Test Template Generator (Enhanced)
+=======================================
 Automatically generates test file templates for Dart source files.
 
+ENHANCED FEATURES:
+- Respects "//No test" exclusions when generating templates
+- Shows excluded functions in comments for reference
+- Provides better template structure for testable functions
+
 This tool analyzes a Dart source file and creates a basic test template
-with placeholder tests for each function it finds.
+with placeholder tests for each function it finds (excluding those marked with //No test).
 
 Usage:
     python3 generate_test_template.py SourceFile.dart
@@ -37,12 +42,50 @@ class TestTemplateGenerator:
             r'^\s*mixin\s+(\w+)',
             re.MULTILINE
         )
+        
+        # Pattern to detect "//No test" comments (case insensitive)
+        self.no_test_pattern = re.compile(
+            r'//\s*no\s*test\b',
+            re.IGNORECASE
+        )
+
+    def _has_no_test_comment(self, content: str, lines: list, line_number: int) -> bool:
+        """
+        Check if a function has a "//No test" comment.
+        
+        Args:
+            content: Full file content
+            lines: File content split into lines  
+            line_number: 1-based line number where function is declared
+            
+        Returns:
+            True if "//No test" comment is found, False otherwise
+        """
+        # Convert to 0-based index
+        line_index = line_number - 1
+        
+        if line_index < 0 or line_index >= len(lines):
+            return False
+        
+        # Check current line for //No test comment
+        current_line = lines[line_index]
+        if self.no_test_pattern.search(current_line):
+            return True
+        
+        # Check previous line for //No test comment
+        if line_index > 0:
+            previous_line = lines[line_index - 1]
+            if self.no_test_pattern.search(previous_line):
+                return True
+        
+        return False
 
     def extract_functions(self, file_path: Path) -> dict:
         """Extract functions, classes, and methods from a Dart file."""
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
+                lines = content.split('\n')
         except Exception as e:
             print(f"❌ Error reading {file_path}: {e}")
             return {}
@@ -55,16 +98,28 @@ class TestTemplateGenerator:
         for match in self.mixin_pattern.finditer(content):
             classes.append(match.group(1))
         
-        # Find functions
-        functions = []
+        # Find functions and categorize them
+        testable_functions = []
+        excluded_functions = []
+        
         for match in self.function_pattern.finditer(content):
             func_name = match.group(1)
+            line_num = content[:match.start()].count('\n') + 1
+            
             # Skip constructors, toString, and main
             if func_name not in ['main', 'toString'] and not func_name[0].isupper():
-                functions.append(func_name)
+                # Check if function should be excluded
+                if self._has_no_test_comment(content, lines, line_num):
+                    excluded_functions.append({
+                        'name': func_name,
+                        'line': line_num
+                    })
+                else:
+                    testable_functions.append(func_name)
         
         return {
-            'functions': functions,
+            'testable_functions': testable_functions,
+            'excluded_functions': excluded_functions,
             'classes': classes,
             'file_content': content
         }
@@ -74,7 +129,8 @@ class TestTemplateGenerator:
         
         # Extract information from source file
         info = self.extract_functions(source_file)
-        functions = info['functions']
+        testable_functions = info['testable_functions']
+        excluded_functions = info['excluded_functions']
         classes = info['classes']
         
         # Get the import path (relative to test directory)
@@ -87,10 +143,21 @@ class TestTemplateGenerator:
             "",
             f"// Test file for {source_file.name}",
             f"// Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-            f"// TODO: Implement comprehensive tests for all functions",
+        ]
+        
+        # Add information about excluded functions if any
+        if excluded_functions:
+            template_lines.extend([
+                f"// NOTE: {len(excluded_functions)} functions are excluded from testing (marked with //No test):",
+            ])
+            for excluded in excluded_functions:
+                template_lines.append(f"//   - {excluded['name']} (line {excluded['line']})")
+        
+        template_lines.extend([
+            f"// TODO: Implement comprehensive tests for {len(testable_functions)} testable functions",
             "",
             "void main() {"
-        ]
+        ])
         
         # Generate test groups for classes
         if classes:
@@ -104,17 +171,18 @@ class TestTemplateGenerator:
                     f"    }});",
                     "",
                     f"    // TODO: Add more tests for {class_name} methods",
+                    f"    // NOTE: Methods marked with //No test are excluded from requirements",
                     f"  }});",
                     ""
                 ])
         
-        # Generate tests for functions
-        if functions:
+        # Generate tests for testable functions only
+        if testable_functions:
             template_lines.extend([
                 "  group('Function Tests', () {"
             ])
             
-            for func_name in functions:
+            for func_name in testable_functions:
                 # Create a test description based on function name
                 test_desc = self._generate_test_description(func_name)
                 
@@ -148,9 +216,24 @@ class TestTemplateGenerator:
             "      // - Very large numbers",
             "      // - Special characters",
             "    });",
-            "  });",
-            "}"
+            "  });"
         ])
+        
+        # Add information comment about excluded functions at the bottom
+        if excluded_functions:
+            template_lines.extend([
+                "",
+                "  // The following functions are excluded from testing (//No test):",
+            ])
+            for excluded in excluded_functions:
+                template_lines.append(f"  // - {excluded['name']} (line {excluded['line']})")
+            
+            template_lines.extend([
+                "  // If you need to test any of these, remove the //No test comment",
+                "  // from the source file and regenerate this template."
+            ])
+        
+        template_lines.append("}")
         
         return "\n".join(template_lines)
 
@@ -190,12 +273,23 @@ class TestTemplateGenerator:
                 print(f"⏭️  Skipped {test_file_name}")
                 return False
         
+        # Analyze what we're generating
+        info = self.extract_functions(source_file)
+        testable_count = len(info['testable_functions'])
+        excluded_count = len(info['excluded_functions'])
+        
         # Write template to file
         try:
             with open(output_file, 'w', encoding='utf-8') as file:
                 file.write(template_content)
+            
             print(f"✅ Created {test_file_name}")
+            if excluded_count > 0:
+                print(f"   📝 {testable_count} functions require tests, {excluded_count} excluded (//No test)")
+            else:
+                print(f"   📝 {testable_count} functions require tests")
             return True
+            
         except Exception as e:
             print(f"❌ Error creating {test_file_name}: {e}")
             return False
@@ -222,8 +316,10 @@ def main():
     
     generator = TestTemplateGenerator()
     
-    print("🧪 DART TEST TEMPLATE GENERATOR")
-    print("=" * 40)
+    print("🧪 DART TEST TEMPLATE GENERATOR (Enhanced)")
+    print("=" * 45)
+    print("✨ Now with //No test exclusion support!")
+    print()
     
     if sys.argv[1] == '--all':
         # Generate templates for all source files that don't have tests
@@ -242,12 +338,32 @@ def main():
         print()
         
         created_count = 0
+        total_testable = 0
+        total_excluded = 0
+        
         for source_file in files_to_process:
+            info = generator.extract_functions(source_file)
+            testable_count = len(info['testable_functions'])
+            excluded_count = len(info['excluded_functions'])
+            
             if generator.create_test_file(source_file, test_dir):
                 created_count += 1
+                total_testable += testable_count
+                total_excluded += excluded_count
         
         print()
         print(f"🎉 Created {created_count} test template files!")
+        print(f"📊 Summary:")
+        print(f"   • {total_testable} functions require tests")
+        print(f"   • {total_excluded} functions excluded (//No test)")
+        
+        if total_excluded > 0:
+            print()
+            print("💡 TIP: Functions marked with //No test are excluded from test requirements.")
+            print("   Review these exclusions to ensure they're appropriate:")
+            print("   • Simple utility functions")
+            print("   • Trivial getters/setters")
+            print("   • Functions difficult to test meaningfully")
         
     else:
         # Generate template for specific file
@@ -259,6 +375,19 @@ def main():
             return 1
         
         print(f"📝 Generating test template for {source_file_name}...")
+        
+        # Show analysis before generating
+        info = generator.extract_functions(source_file)
+        testable_count = len(info['testable_functions'])
+        excluded_count = len(info['excluded_functions'])
+        
+        print(f"🔍 Analysis: {testable_count + excluded_count} total functions found")
+        if excluded_count > 0:
+            print(f"   ⏭️  {excluded_count} functions excluded (//No test)")
+            print(f"   ✅ {testable_count} functions will get test templates")
+        else:
+            print(f"   ✅ All {testable_count} functions will get test templates")
+        print()
         
         if generator.create_test_file(source_file, test_dir):
             print("🎉 Test template created successfully!")
@@ -272,6 +401,7 @@ def main():
     print("• Replace TODO comments with actual test code")
     print("• Run 'dart test' to verify your tests work")
     print("• Use 'python3 test_progress_tracker.py' to monitor progress")
+    print("• Add //No test comments to exclude simple functions from requirements")
     
     return 0
 

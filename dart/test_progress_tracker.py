@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """
-Test Progress Tracker
-====================
+Test Progress Tracker (Enhanced)
+===============================
 A simplified version of the Dart Test Analyzer that focuses on showing
 students their progress as they add more test files.
+
+ENHANCED FEATURES:
+- Respects "//No test" exclusions when calculating progress
+- Shows excluded functions separately  
+- Provides accurate coverage percentages
 
 This script is designed for incremental development - run it after creating
 each new test file to see your coverage improve!
@@ -11,8 +16,88 @@ each new test file to see your coverage improve!
 
 import os
 import sys
+import re
 from pathlib import Path
 from datetime import datetime
+
+def has_no_test_comment(content: str, lines: list, line_number: int) -> bool:
+    """
+    Check if a function has a "//No test" comment.
+    
+    Args:
+        content: Full file content
+        lines: File content split into lines  
+        line_number: 1-based line number where function is declared
+        
+    Returns:
+        True if "//No test" comment is found, False otherwise
+    """
+    # Pattern to detect "//No test" comments (case insensitive)
+    no_test_pattern = re.compile(r'//\s*no\s*test\b', re.IGNORECASE)
+    
+    # Convert to 0-based index
+    line_index = line_number - 1
+    
+    if line_index < 0 or line_index >= len(lines):
+        return False
+    
+    # Check current line for //No test comment
+    current_line = lines[line_index]
+    if no_test_pattern.search(current_line):
+        return True
+    
+    # Check previous line for //No test comment
+    if line_index > 0:
+        previous_line = lines[line_index - 1]
+        if no_test_pattern.search(previous_line):
+            return True
+    
+    return False
+
+def count_testable_functions(file_path: Path) -> tuple:
+    """
+    Count functions in a Dart file, excluding those marked with //No test.
+    
+    Args:
+        file_path: Path to the Dart source file
+        
+    Returns:
+        Tuple of (total_functions, testable_functions, excluded_functions)
+    """
+    if not file_path.exists():
+        return 0, 0, 0
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+            lines = content.split('\n')
+    except Exception:
+        return 0, 0, 0
+    
+    # Simple function pattern (similar to main analyzer)
+    function_pattern = re.compile(
+        r'^\s*(?:static\s+)?(?:@override\s+)?(?:Future<\w+>\s+|void\s+|\w+\s+)?'
+        r'(\w+)\s*\([^)]*\)\s*(?:=>\s*[^;]+;|{)',
+        re.MULTILINE
+    )
+    
+    total_functions = 0
+    excluded_functions = 0
+    
+    for match in function_pattern.finditer(content):
+        func_name = match.group(1)
+        line_num = content[:match.start()].count('\n') + 1
+        
+        # Skip main function and constructors (same logic as main analyzer)
+        if func_name not in ['main', 'toString'] and not func_name[0].isupper():
+            total_functions += 1
+            
+            # Check if this function should be excluded
+            if has_no_test_comment(content, lines, line_num):
+                excluded_functions += 1
+    
+    testable_functions = total_functions - excluded_functions
+    return total_functions, testable_functions, excluded_functions
 
 def count_files(directory: Path, pattern: str) -> int:
     """Count files matching a pattern in a directory."""
@@ -51,8 +136,38 @@ def print_progress_bar(percentage: float, width: int = 40) -> str:
     bar = '█' * filled + '░' * (width - filled)
     return f"[{bar}] {percentage:.1f}%"
 
+def analyze_function_coverage(lib_dir: Path, source_files: list) -> dict:
+    """Analyze function-level coverage including //No test exclusions."""
+    total_functions = 0
+    total_testable = 0
+    total_excluded = 0
+    file_details = []
+    
+    for source_file_name in source_files:
+        source_file_path = lib_dir / source_file_name
+        total, testable, excluded = count_testable_functions(source_file_path)
+        
+        total_functions += total
+        total_testable += testable
+        total_excluded += excluded
+        
+        if total > 0:  # Only include files with functions
+            file_details.append({
+                'file': source_file_name,
+                'total': total,
+                'testable': testable,
+                'excluded': excluded
+            })
+    
+    return {
+        'total_functions': total_functions,
+        'total_testable': total_testable,
+        'total_excluded': total_excluded,
+        'file_details': file_details
+    }
+
 def main():
-    """Run the simplified progress tracker."""
+    """Run the enhanced progress tracker."""
     
     # Determine project directory
     if len(sys.argv) > 1:
@@ -75,9 +190,12 @@ def main():
     # Calculate coverage
     covered, missing, coverage_percent = calculate_coverage(source_files, test_files)
     
+    # Analyze function-level coverage
+    function_analysis = analyze_function_coverage(lib_dir, source_files)
+    
     # Print header
-    print("🎯 DART TEST PROGRESS TRACKER")
-    print("=" * 50)
+    print("🎯 DART TEST PROGRESS TRACKER (Enhanced)")
+    print("=" * 55)
     print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"📁 Project: {project_dir.name}")
     print()
@@ -89,6 +207,18 @@ def main():
     print(f"Test Files: {len(test_files)}")
     print(f"Covered Files: {covered}")
     print(f"Missing Tests: {missing}")
+    print()
+    
+    # Print function-level analysis
+    print("🔧 FUNCTION ANALYSIS")
+    print("-" * 30)
+    print(f"Total Functions/Methods: {function_analysis['total_functions']}")
+    print(f"Testable Functions: {function_analysis['total_testable']}")
+    print(f"Excluded (//No test): {function_analysis['total_excluded']}")
+    if function_analysis['total_testable'] > 0:
+        testable_coverage = (function_analysis['total_testable'] / 
+                           (function_analysis['total_testable'] + function_analysis['total_excluded'])) * 100
+        print(f"Testable Coverage: {testable_coverage:.1f}%")
     print()
     
     # Print progress bar
@@ -147,6 +277,7 @@ def main():
             print(f"• Template: test/{next_file}")
             print("• Use 'group()' and 'test()' functions")
             print("• Test each function in the source file")
+            print("• Use //No test to exclude simple functions")
     
     # Show recently created tests
     if test_files:
@@ -156,13 +287,31 @@ def main():
         for test_file in sorted(test_files):
             print(f"✓ {test_file}")
     
+    # Show files with excluded functions
+    excluded_files = [f for f in function_analysis['file_details'] if f['excluded'] > 0]
+    if excluded_files:
+        print()
+        print("ℹ️  FILES WITH EXCLUDED FUNCTIONS")
+        print("-" * 30)
+        for file_info in excluded_files:
+            print(f"📁 {file_info['file']}: {file_info['excluded']} excluded, "
+                  f"{file_info['testable']} testable")
+    
     print()
     print("🔧 COMMANDS TO TRY")
     print("-" * 30)
     print("• Run all tests: dart test")
     print("• Run specific test: dart test test/YourFile_test.dart")
     print("• Full analysis: python3 dart_test_analyzer.py")
+    print("• Generate templates: python3 generate_test_template.py --all")
     print("• Check progress: python3 test_progress_tracker.py")
+    
+    print()
+    print("📖 TIP: Use //No test comments to exclude simple functions:")
+    print("   void simpleUtility() { //No test")
+    print("   or:")
+    print("   //No test") 
+    print("   void anotherFunction() {")
     
     return 0
 

@@ -12,6 +12,8 @@ This script performs the following analysis:
 5. Captures and analyzes print statements in tests
 6. Generates detailed reports
 
+SPECIAL FEATURE: Functions/methods with "//No test" comment are excluded from coverage analysis.
+
 Author: University Teaching Assistant
 Purpose: Educational tool for ASE456 course
 """
@@ -35,6 +37,7 @@ class FunctionInfo:
     class_name: Optional[str] = None
     line_number: int = 0
     signature: str = ""
+    excluded_from_testing: bool = False  # New field for "//No test" tag
 
 
 @dataclass
@@ -77,6 +80,14 @@ class DartParser:
     - Classes and mixins
     - Constructors
     - Getters and setters
+    
+    SPECIAL FEATURE: Recognizes "//No test" comments to exclude items from testing requirements
+    
+    Supported comment formats:
+    - Same line: void myFunction() { //No test
+    - Previous line: //No test
+                    void myFunction() {
+    - Case insensitive: //no test, //NO TEST, //No Test
     """
 
     def __init__(self):
@@ -112,6 +123,47 @@ class DartParser:
             r'^\s*(?:@override\s+)?set\s+(\w+)',
             re.MULTILINE
         )
+        
+        # Pattern to detect "//No test" comments (case insensitive)
+        self.no_test_pattern = re.compile(
+            r'//\s*no\s*test\b',
+            re.IGNORECASE
+        )
+
+    def _has_no_test_comment(self, content: str, lines: List[str], line_number: int) -> bool:
+        """
+        Check if a function/method has a "//No test" comment.
+        
+        Checks both:
+        1. Same line as the function declaration
+        2. The line immediately before the function declaration
+        
+        Args:
+            content: Full file content
+            lines: File content split into lines
+            line_number: 1-based line number where function is declared
+            
+        Returns:
+            True if "//No test" comment is found, False otherwise
+        """
+        # Convert to 0-based index
+        line_index = line_number - 1
+        
+        if line_index < 0 or line_index >= len(lines):
+            return False
+        
+        # Check current line for //No test comment
+        current_line = lines[line_index]
+        if self.no_test_pattern.search(current_line):
+            return True
+        
+        # Check previous line for //No test comment
+        if line_index > 0:
+            previous_line = lines[line_index - 1]
+            if self.no_test_pattern.search(previous_line):
+                return True
+        
+        return False
 
     def parse_source_file(self, file_path: str) -> List[FunctionInfo]:
         """
@@ -196,12 +248,16 @@ class DartParser:
             if not self._is_inside_class(content, match.start()):
                 # Skip main function and constructors
                 if func_name not in ['main', 'toString'] and not func_name[0].isupper():
+                    # Check for "//No test" comment
+                    excluded = self._has_no_test_comment(content, lines, line_num)
+                    
                     signature = self._extract_signature(lines, line_num - 1)
                     functions.append(FunctionInfo(
                         name=func_name,
                         type='function',
                         line_number=line_num,
-                        signature=signature
+                        signature=signature,
+                        excluded_from_testing=excluded
                     ))
                     
         return functions
@@ -221,13 +277,17 @@ class DartParser:
                 
                 # Skip constructors and toString
                 if method_name != class_name and method_name not in ['toString']:
+                    # Check for "//No test" comment
+                    excluded = self._has_no_test_comment(content, lines, line_num)
+                    
                     signature = self._extract_signature(lines, line_num - 1)
                     methods.append(FunctionInfo(
                         name=method_name,
                         type='method',
                         class_name=class_name,
                         line_number=line_num,
-                        signature=signature
+                        signature=signature,
+                        excluded_from_testing=excluded
                     ))
                     
         return methods
@@ -243,13 +303,17 @@ class DartParser:
             line_num = content[:match.start()].count('\n') + 1
             class_name = self._find_containing_class(content, match.start(), classes)
             
+            # Check for "//No test" comment
+            excluded = self._has_no_test_comment(content, lines, line_num)
+            
             signature = self._extract_signature(lines, line_num - 1)
             getters_setters.append(FunctionInfo(
                 name=getter_name,
                 type='getter',
                 class_name=class_name,
                 line_number=line_num,
-                signature=signature
+                signature=signature,
+                excluded_from_testing=excluded
             ))
             
         # Find setters
@@ -258,13 +322,17 @@ class DartParser:
             line_num = content[:match.start()].count('\n') + 1
             class_name = self._find_containing_class(content, match.start(), classes)
             
+            # Check for "//No test" comment
+            excluded = self._has_no_test_comment(content, lines, line_num)
+            
             signature = self._extract_signature(lines, line_num - 1)
             getters_setters.append(FunctionInfo(
                 name=setter_name,
                 type='setter',
                 class_name=class_name,
                 line_number=line_num,
-                signature=signature
+                signature=signature,
+                excluded_from_testing=excluded
             ))
             
         return getters_setters
@@ -556,7 +624,14 @@ class DartTestAnalyzer:
         for source_file in source_files:
             functions = self.dart_parser.parse_source_file(str(source_file))
             self.source_files[source_file.name] = functions
-            print(f"  {source_file.name}: {len(functions)} functions/methods found")
+            
+            # Count excluded functions
+            excluded_count = sum(1 for f in functions if f.excluded_from_testing)
+            total_count = len(functions)
+            testable_count = total_count - excluded_count
+            
+            print(f"  {source_file.name}: {total_count} functions/methods found "
+                  f"({testable_count} require tests, {excluded_count} excluded)")
         
         # Step 3: Parse test files
         print("\n🧪 Parsing test files...")
@@ -606,8 +681,10 @@ class DartTestAnalyzer:
                     'expected_test_file': expected_test_name
                 })
         
-        # Check for missing function tests
+        # Check for missing function tests (EXCLUDING functions marked with //No test)
         missing_function_tests = []
+        excluded_function_tests = []  # Track excluded functions separately
+        
         for source_file_name, functions in self.source_files.items():
             corresponding_test_file = source_file_name.replace('.dart', '_test.dart')
             
@@ -618,7 +695,18 @@ class DartTestAnalyzer:
                         tested_functions.add(test.tested_function.lower())
                 
                 for func in functions:
-                    if func.name.lower() not in tested_functions:
+                    if func.excluded_from_testing:
+                        # Track excluded functions separately
+                        excluded_function_tests.append({
+                            'source_file': source_file_name,
+                            'function': func.name,
+                            'type': func.type,
+                            'class_name': func.class_name,
+                            'line_number': func.line_number,
+                            'reason': 'Marked with //No test comment'
+                        })
+                    elif func.name.lower() not in tested_functions:
+                        # Only report as missing if not excluded
                         missing_function_tests.append({
                             'source_file': source_file_name,
                             'function': func.name,
@@ -627,8 +715,12 @@ class DartTestAnalyzer:
                             'line_number': func.line_number
                         })
         
-        # Calculate overall statistics
+        # Calculate overall statistics (excluding functions marked with //No test)
         total_functions = sum(len(functions) for functions in self.source_files.values())
+        excluded_functions = sum(1 for functions in self.source_files.values() 
+                               for func in functions if func.excluded_from_testing)
+        testable_functions = total_functions - excluded_functions
+        
         total_tests = sum(len(tests) for tests in self.test_files.values())
         total_test_runs = sum(result.total_tests for result in self.test_results.values())
         total_passed = sum(result.passed_tests for result in self.test_results.values())
@@ -640,6 +732,8 @@ class DartTestAnalyzer:
                 'total_source_files': len(source_files),
                 'total_test_files': len(test_files),
                 'total_functions': total_functions,
+                'testable_functions': testable_functions,
+                'excluded_functions': excluded_functions,
                 'total_tests': total_tests,
                 'total_test_runs': total_test_runs,
                 'total_passed': total_passed,
@@ -648,6 +742,7 @@ class DartTestAnalyzer:
             },
             'missing_test_files': missing_test_files,
             'missing_function_tests': missing_function_tests,
+            'excluded_function_tests': excluded_function_tests,  # New field
             'source_files': {name: [func.__dict__ for func in functions] 
                            for name, functions in self.source_files.items()},
             'test_files': {name: [test.__dict__ for test in tests] 
@@ -686,6 +781,8 @@ class DartTestAnalyzer:
             f"Source Files: {summary['total_source_files']}",
             f"Test Files: {summary['total_test_files']}",
             f"Total Functions/Methods: {summary['total_functions']}",
+            f"Testable Functions/Methods: {summary['testable_functions']}",
+            f"Excluded Functions (//No test): {summary['excluded_functions']}",
             f"Total Test Cases: {summary['total_tests']}",
             f"Test Execution Results: {summary['total_passed']}/{summary['total_test_runs']} passed",
             f"Overall Pass Rate: {summary['pass_rate']:.1f}%",
@@ -727,7 +824,31 @@ class DartTestAnalyzer:
                     f"[line {missing['line_number']}]"
                 )
         else:
-            report_lines.append("✅ All functions have corresponding tests")
+            report_lines.append("✅ All testable functions have corresponding tests")
+            
+        report_lines.append("")
+        
+        # Excluded Functions (NEW SECTION)
+        excluded_function_tests = results['excluded_function_tests']
+        if excluded_function_tests:
+            report_lines.extend([
+                "ℹ️  EXCLUDED FUNCTIONS (//No test)",
+                "-" * 40
+            ])
+            
+            current_file = None
+            for excluded in excluded_function_tests:
+                if excluded['source_file'] != current_file:
+                    current_file = excluded['source_file']
+                    report_lines.append(f"\n📁 {current_file}:")
+                
+                class_info = f" (in {excluded['class_name']})" if excluded['class_name'] else ""
+                report_lines.append(
+                    f"  ⏭️  {excluded['type']}: {excluded['function']}{class_info} "
+                    f"[line {excluded['line_number']}] - {excluded['reason']}"
+                )
+            
+            report_lines.extend(["", f"📝 Note: {len(excluded_function_tests)} functions are excluded from testing requirements"])
             
         report_lines.append("")
         
@@ -763,9 +884,10 @@ class DartTestAnalyzer:
                 report_lines.append(f"\n📁 {source_file}:")
                 for func in functions:
                     class_info = f" (in {func['class_name']})" if func['class_name'] else ""
+                    exclusion_marker = " [EXCLUDED]" if func.get('excluded_from_testing', False) else ""
                     report_lines.append(
                         f"  🔧 {func['type']}: {func['name']}{class_info} "
-                        f"[line {func['line_number']}]"
+                        f"[line {func['line_number']}]{exclusion_marker}"
                     )
         
         # Recommendations
@@ -791,12 +913,36 @@ class DartTestAnalyzer:
             recommendations.append(
                 f"Fix failing tests to improve pass rate from {summary['pass_rate']:.1f}% to 100%"
             )
+        
+        if excluded_function_tests:
+            recommendations.append(
+                f"Review {len(excluded_function_tests)} excluded functions to ensure //No test tags are appropriate"
+            )
             
         if not recommendations:
             recommendations.append("🎉 Excellent! Your test coverage is complete.")
             
         for i, rec in enumerate(recommendations, 1):
             report_lines.append(f"{i}. {rec}")
+        
+        # Add information about //No test feature
+        report_lines.extend([
+            "",
+            "📖 ABOUT //No test EXCLUSIONS",
+            "-" * 40,
+            "Functions or methods can be excluded from test requirements by adding:",
+            "• Same line comment: void myFunction() { //No test",
+            "• Previous line comment:",
+            "  //No test", 
+            "  void myFunction() {",
+            "• Case insensitive: //no test, //NO TEST, //No Test",
+            "",
+            "Use this feature for:",
+            "• Simple utility functions that don't need testing",
+            "• Getters/setters with trivial implementations", 
+            "• Functions that are difficult to test meaningfully",
+            "• Legacy code that will be removed soon"
+        ])
         
         report_lines.extend(["", "=" * 80])
         
@@ -817,7 +963,7 @@ def main():
     Main function to run the Dart Test Analyzer.
     
     Usage:
-        python dart_test_analyzer.py [project_directory]
+        python3 dart_test_analyzer.py [project_directory]
     """
     
     # Get project directory from command line or use default
@@ -830,7 +976,7 @@ def main():
     # Validate directory
     if not os.path.exists(project_dir):
         print(f"❌ Error: Directory '{project_dir}' does not exist")
-        print("\nUsage: python dart_test_analyzer.py [project_directory]")
+        print("\nUsage: python3 dart_test_analyzer.py [project_directory]")
         return 1
     
     # Create analyzer and run analysis
@@ -852,6 +998,9 @@ def main():
         print("\n📊 ANALYSIS COMPLETE!")
         print(f"📁 Source Files: {results['summary']['total_source_files']}")
         print(f"🧪 Test Files: {results['summary']['total_test_files']}")
+        print(f"🔧 Total Functions: {results['summary']['total_functions']}")
+        print(f"✅ Testable Functions: {results['summary']['testable_functions']}")
+        print(f"⏭️  Excluded Functions: {results['summary']['excluded_functions']}")
         print(f"📈 Pass Rate: {results['summary']['pass_rate']:.1f}%")
         print(f"📄 Full report saved to: {report_file}")
         

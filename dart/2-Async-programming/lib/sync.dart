@@ -1,5 +1,6 @@
 import 'dart:io';
 
+//No test
 void fetchUserData() {
   print("1. Starting request...");
   sleep(Duration(seconds:3));
