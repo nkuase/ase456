@@ -1,0 +1,9 @@
+name: cascade_examples
+description: Dart cascade operator examples and unit tests for ASE456 course
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dev_dependencies:
+  test: ^1.24.0
