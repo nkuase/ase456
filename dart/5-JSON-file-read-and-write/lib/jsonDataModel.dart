@@ -16,12 +16,7 @@ class MarpConfig {
 
   // Convert object to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'theme': theme,
-      'size': size,
-      'math': math,
-      'author': author,
-    };
+    return {'theme': theme, 'size': size, 'math': math, 'author': author};
   }
 
   // Create object from JSON map
@@ -44,4 +39,4 @@ void main() {
   var m2 = MarpConfig.fromJson(marp);
   print(m2);
   print(m2.theme);
-}  
+}
