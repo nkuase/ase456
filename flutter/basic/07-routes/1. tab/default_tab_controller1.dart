@@ -32,9 +32,8 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: TabPage(),);
+  Widget build(BuildContext context) {
+    return MaterialApp(debugShowCheckedModeBanner: false, home: TabPage());
   }
 }
 
@@ -60,13 +59,34 @@ class TabPage extends StatelessWidget {
         // Specify tabbarview
         // We use Container as a Page, but we can use other widgets/pages
         body: TabBarView(
-            children: <Widget>[
-              Container(color: Colors.yellow,),
-              Container(color: Colors.orange,),
-              Container(color: Colors.red,),
-            ]),
+          children: <Widget>[
+            Home1(),
+            Home2(),
+            Container(color: Colors.red),
+          ],
+        ),
       ),
     );
   }
 }
 
+class Home1 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        "Home1",
+        style: TextStyle(
+          fontSize: 48, // Make text big; adjust as needed
+          fontWeight: FontWeight.bold, // Optional: make it bold
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+class Home2 extends StatelessWidget {
+  Widget build(BuildContext context) {
+    return Scaffold(body: Text("Home2"));
+  }
+}

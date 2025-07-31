@@ -20,7 +20,7 @@ class _DialogPageState extends State<DialogPage> {
       appBar: AppBar(
         title: const Text('Dialog'),
       ),
-      body: Text(info), // This info will be updated from the dialog
+      body: Text(this.info), // This info will be updated from the dialog
       floatingActionButton: FloatingActionButton(
         // click the button to display dialog
         onPressed: () {
