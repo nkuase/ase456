@@ -1,2 +1,0 @@
-// YOU SHOULD USE YOUR API KEY HERE
-const apiKey = 'f255bcb06664ac735cac0ec';
