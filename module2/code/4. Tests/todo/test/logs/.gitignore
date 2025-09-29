@@ -1,0 +1,4 @@
+# Test log files - these are for debugging only
+*.log
+test_run_*.log
+latest.log
