@@ -1,7 +1,0 @@
-dart pub get
-dart test test/foobar_json_test.dart
-dart test test/foobar_crud_test.dart
-dart test test/foobar_utility_test.dart
-
-# for the specific test that causes an error 
-# dart test test/foobar_crud_test.dart -n "Simple Tests should have exists method that accepts String"
