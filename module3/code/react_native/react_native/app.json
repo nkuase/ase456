@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "React Native Examples",
+    "slug": "react-native-examples",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ase456.reactnativeexamples"
+    },
+    "android": {
+      "package": "com.ase456.reactnativeexamples"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "platforms": ["ios", "android", "web"]
+  }
+}
